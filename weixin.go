@@ -88,7 +88,7 @@ func main() {
 		cmd := exec.Command("go", "get", "-u", "github.com/sunclx/weixin")
 		err := cmd.Run()
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("errors:", err)
 		}
 
 	})
