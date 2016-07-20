@@ -33,8 +33,8 @@ func validate(r *http.Request) bool {
 	h.Write([]byte(s))
 	bs := h.Sum(nil)
 
-	//比较计算的signature与获取的是否一致
-	if signatureHex := fmt.Sprintf("%x\n", bs); signatureHex != signature {
+	//比较计算的signature与获取值比较
+	if signatureHex := fmt.Sprintf("%x", bs); signatureHex != signature {
 		return false
 	}
 	return true
