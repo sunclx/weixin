@@ -9,9 +9,6 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-func validate(r *http.Request) bool {
-	return true
-}
 func handleError(err error) {
 
 }
@@ -72,9 +69,9 @@ func requestHandle(r *http.Request) []byte {
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if !validate(r) {
+			w.WriteHeader(404)
 			return
 		}
-		db()
 
 		data := requestHandle(r)
 		w.Write(data)
