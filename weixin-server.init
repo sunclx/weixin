@@ -71,9 +71,9 @@ fun_start()
         echo "${ProgramName} (pid `pidof $NAME`) already running."
         return 0
     fi
-    fun_load_config
+    #fun_load_config
     echo -n "Starting ${ProgramName}..."
-    ${BIN} -c ${CONFIGFILE} > ${LOGFILE} 2>&1 &
+    ${BIN} > ${LOGFILE} 2>&1 &
     PID=`pidof ${NAME}`
     echo $PID > $PID_FILE
     sleep 0.3
