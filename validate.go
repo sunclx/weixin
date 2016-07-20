@@ -14,7 +14,7 @@ const (
 
 func validate(r *http.Request) bool {
 	if hostname := r.URL.Host; hostname != "weixin.chenlixin.net" {
-		fmt.Println(hostname)
+		fmt.Println("hostname:", hostname)
 		return false
 	}
 
