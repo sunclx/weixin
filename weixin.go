@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net/http"
-	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/boltdb/bolt"
@@ -86,8 +85,11 @@ func main() {
 	})
 
 	http.HandleFunc("/update", func(w http.ResponseWriter, r *http.Request) {
-		io.Copy(os.Stdout, r.Body)
-		fmt.Println(r.URL.String())
+		cmd := exec.Command("go", "get", "-u", "github.com/sunclx/weixin")
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println(err)
+		}
 
 	})
 	http.ListenAndServe(":80", nil)
