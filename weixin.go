@@ -78,7 +78,7 @@ func main() {
 
 		data := requestHandle(r)
 
-		w.Write(data)
+		//w.Write(data)
 		w.Write([]byte("你好"))
 
 		fmt.Println(r.URL.String())
