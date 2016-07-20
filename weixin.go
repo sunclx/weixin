@@ -21,6 +21,7 @@ func requestHandle(r *http.Request) []byte {
 		handleError(err)
 		return nil
 	}
+	fmt.Println(text)
 	resMsg := func(text Text) (s string) {
 
 		db, err := bolt.Open("data.db", 0600, nil)
