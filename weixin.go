@@ -42,7 +42,7 @@ func requestHandle(r *http.Request) []byte {
 
 		db.Update(func(tx *bolt.Tx) error {
 			b := tx.Bucket([]byte("default"))
-			data := b.Get([]byte("oXU74wMt--mr4eaVyhmJ5h_lSJP0"))
+			data := b.Get([]byte(text.FromUserName))
 			if data == nil {
 				s = `请输入"我的学号是00000000"`
 				return nil
