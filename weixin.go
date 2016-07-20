@@ -70,6 +70,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if !validate(r) {
 			w.WriteHeader(404)
+			w.Write([]byte("404"))
 			return
 		}
 
