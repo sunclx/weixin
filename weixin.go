@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/boltdb/bolt"
@@ -80,6 +82,12 @@ func main() {
 
 		fmt.Println(r.URL.String())
 		fmt.Println(string(data))
+
+	})
+
+	http.HandleFunc("/update", func(w http.ResponseWriter, r *http.Request) {
+		io.Copy(os.Stdout, r.Body)
+		fmt.Println(r.URL.String())
 
 	})
 	http.ListenAndServe(":80", nil)
