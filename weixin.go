@@ -48,6 +48,11 @@ func requestHandle(r *http.Request) []byte {
 				s = `请输入"我的学号是00000000"`
 				return nil
 			}
+
+			if string(data) == "09170515" {
+				s = "你是跳跳，一个大美女"
+				return nil
+			}
 			s = fmt.Sprintf("你的学号是%s，你是%s", data, "我们班的同学")
 
 			return nil
