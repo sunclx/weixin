@@ -86,10 +86,10 @@ func main() {
 
 	http.HandleFunc("/update", func(w http.ResponseWriter, r *http.Request) {
 		cmd := exec.Command("go", "get", "-u", "github.com/sunclx/weixin")
-		err := cmd.Run()
-		if err != nil {
-			fmt.Println("errors:", err)
-		}
+		cmd.Run()
+		// if err != nil {
+		// 	fmt.Println("errors:", err)
+		// }
 
 	})
 	http.ListenAndServe(":80", nil)
