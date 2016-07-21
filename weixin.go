@@ -90,6 +90,7 @@ func main() {
 		c.Write("")
 
 	})
+	server.Listen(":80")
 	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 	// 	fmt.Println(r.Method, r.RequestURI, r.RemoteAddr)
 	// 	if !validate(r) {
