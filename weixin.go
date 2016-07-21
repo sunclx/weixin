@@ -9,11 +9,6 @@ import (
 
 func main() {
 	server := iris.New()
-	server.HandleFunc("", "/", func(c *iris.Context) {
-		//记录请求
-		fmt.Println(c.MethodString(), c.URI(), c.RemoteAddr())
-		c.WriteString("404")
-	})
 
 	//监听微信服务器的信息
 	server.Post("/", func(c *iris.Context) {
