@@ -19,6 +19,7 @@ func main() {
 	//启动服务
 	server.Listen(":80")
 }
+
 func mainHandle(c *iris.Context) {
 	logConect(c)
 
@@ -63,7 +64,9 @@ func updateHandle(c *iris.Context) {
 		fmt.Println("errors:", err)
 
 	}
+	c.WriteString("success")
 }
+
 func logConect(c *iris.Context) {
 	//记录请求
 	fmt.Println(c.MethodString(), c.URI(), c.RemoteAddr())
