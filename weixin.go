@@ -1,6 +1,10 @@
 package main
 
-import "github.com/kataras/iris"
+import (
+	"fmt"
+
+	"github.com/kataras/iris"
+)
 
 func handleError(err error) {
 
@@ -80,12 +84,12 @@ func main() {
 
 		//处理请求数据
 		data := c.PostBody()
-		c.Log("%s", data)
+		fmt.Printf("%s\n", data)
 		requestHandle(c)
 
 		var msg Text
 		c.ReadXML(&msg)
-		c.Log("%#v", msg)
+		fmt.Printf("%s\n", data)
 
 		c.Write("")
 
