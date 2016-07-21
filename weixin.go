@@ -34,7 +34,6 @@ func main() {
 		}
 
 		//处理请求数据
-
 		var t msgType
 		c.ReadXML(&t)
 		switch t.MsgType {
@@ -46,7 +45,7 @@ func main() {
 			c.Log("不支持该类型，%s.\n", t.MsgType)
 
 		}
-		fmt.Println("结束")
+
 		c.Write("")
 
 	})
