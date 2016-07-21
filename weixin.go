@@ -9,7 +9,6 @@ import (
 
 func main() {
 	server := iris.New()
-
 	//监听微信服务器的信息
 	server.Post("/", func(c *iris.Context) {
 		//记录请求
@@ -26,28 +25,24 @@ func main() {
 		signature := c.URLParam("signature")
 		timestamp := c.URLParam("timestamp")
 		nonce := c.URLParam("nonce")
-		//openid:=c.URLParam("openid")
 		if !validateURL(signature, timestamp, nonce) {
 			c.Log("参数错误%s,%s,%s.\n", signature, timestamp, nonce)
 			c.Write("404")
 			return
 		}
 
+		//过滤openid
+		openid := c.URLParam("openid")
+		filteOpenid(openid)
+
 		//处理请求数据
-		var t msgType
-		c.ReadXML(&t)
-		switch t.MsgType {
-		case MsgTypeText:
-			data := c.PostBody()
-			c.Log("%s\n", data)
-			TextHandle(data)
-		default:
-			c.Log("不支持该类型，%s.\n", t.MsgType)
+		handlerMux(c)
+	})
 
-		}
-
-		c.Write("")
-
+	server.HandleFunc("", "/", func(c *iris.Context) {
+		//记录请求
+		fmt.Println(c.MethodString(), c.URI(), c.RemoteAddr())
+		c.WriteString("404")
 	})
 
 	//监听github.com的自动更新
@@ -66,4 +61,8 @@ func main() {
 
 	//启动服务
 	server.Listen(":80")
+}
+
+func filteOpenid(openid string) {
+
 }

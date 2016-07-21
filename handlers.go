@@ -1,7 +1,28 @@
 package main
 
-func TextHandle(msg []byte) []byte {
-	return []byte{}
+import "github.com/kataras/iris"
+
+func handlerMux(c *iris.Context) {
+	var t msgType
+	c.ReadXML(&t)
+	switch t.MsgType {
+	case MsgTypeImage:
+		handleImage(c)
+	case MsgTypeVoice:
+		handleVoice(c)
+	case MsgTypeText:
+		handleVideo(c)
+	case MsgTypeText:
+		handleMusic(c)
+	case MsgTypeNews:
+		handleNews(c)
+	default:
+		c.Log("不支持该类型，%s.\n", t.MsgType)
+		c.WriteString("")
+	}
+}
+
+func handleText(c *iris.Context) {
 
 	// text, err := unmarshalMsg(r)
 	// if err != nil {
@@ -55,3 +76,9 @@ func TextHandle(msg []byte) []byte {
 	// return []byte(marshaMsg(text.FromUserName, resMsg))
 
 }
+
+func handleImage(c *iris.Context) {}
+func handleVoice(c *iris.Context) {}
+func handleVideo(c *iris.Context) {}
+func handleMusic(c *iris.Context) {}
+func handleNews(c *iris.Context)  {}
