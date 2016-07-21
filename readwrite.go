@@ -3,8 +3,6 @@ package main
 import (
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"time"
 )
 
@@ -17,14 +15,8 @@ type Text struct {
 	MsgID        int64  `xml:"MsgId"`
 }
 
-func unmarshalMsg(r *http.Request) (msg Text, err error) {
-	data, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return
-	}
-	fmt.Println(string(data))
+func unmarshalMsg(data []byte) (msg Text, err error) {
 	xml.Unmarshal(data, &msg)
-
 	return msg, nil
 }
 

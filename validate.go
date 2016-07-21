@@ -3,26 +3,23 @@ package main
 import (
 	"crypto/sha1"
 	"fmt"
-	"net/http"
 	"sort"
 	"strings"
+
+	"github.com/kataras/iris"
 )
 
 const (
 	token string = "njmu0917"
 )
 
-func validate(r *http.Request) bool {
-	if hostname := r.Host; hostname != "weixin.chenlixin.net" {
-		fmt.Println("hostname:", hostname)
-		return false
-	}
+func validateURL(parameters iris.PathParameters) bool {
 
 	//获取参数
-	values := r.URL.Query()
-	signature := values.Get("signature")
-	timestamp := values.Get("timestamp")
-	nonce := values.Get("nonce")
+
+	signature := parameters.Get("signature")
+	timestamp := parameters.Get("timestamp")
+	nonce := parameters.Get("nonce")
 
 	//排序参数并合并
 	ss := []string{token, timestamp, nonce}
