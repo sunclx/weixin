@@ -15,7 +15,7 @@ func main() {
 	server.Get("/update", updateHandle)
 
 	//监听微信服务器的信息
-	server.HandleFunc("", "/*any", mainHandle)
+	server.HandleFunc("", "/", mainHandle)
 
 	//启动服务
 	server.Listen(":80")
