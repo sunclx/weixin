@@ -7,13 +7,10 @@ import (
 	"github.com/kataras/iris"
 )
 
-func handleError(err error) {
-
-}
-
 func main() {
 	server := iris.New()
 
+	//监听微信服务器的信息
 	server.Post("/", func(c *iris.Context) {
 		//记录请求
 		fmt.Println(c.MethodString(), c.URI(), c.RemoteAddr())
@@ -37,19 +34,24 @@ func main() {
 		}
 
 		//处理请求数据
-		data := c.PostBody()
-		c.Log("%s\n", data)
-		requestHandle(c)
 
-		var msg Text
-		c.ReadXML(&msg)
-		c.Log("%v\n", data)
+		var t msgType
+		c.ReadXML(&t)
+		switch t.MsgType {
+		case MsgTypeText:
+			data := c.PostBody()
+			c.Log("%s\n", data)
+			TextHandle(data)
+		default:
+			c.Log("不支持该类型，%s.\n", t.MsgType)
+
+		}
 
 		c.Write("")
 
 	})
 
-	//自动更新
+	//监听github.com的自动更新
 	server.Post("/update", func(c *iris.Context) {
 		//记录请求
 		fmt.Println(c.MethodString(), c.URI(), c.RemoteAddr())
@@ -63,9 +65,6 @@ func main() {
 		}
 	})
 
+	//启动服务
 	server.Listen(":80")
-
-	// http.HandleFunc("/update", func(w http.ResponseWriter, r *http.Request) {
-	// 	fmt.Println(r.Method, r.RequestURI, r.RemoteAddr)
-
 }

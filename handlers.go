@@ -1,8 +1,6 @@
 package main
 
-import "github.com/kataras/iris"
-
-func requestHandle(c *iris.Context) []byte {
+func TextHandle(msg []byte) []byte {
 	return []byte{}
 
 	// text, err := unmarshalMsg(r)
