@@ -32,20 +32,25 @@ type Text struct {
 	MsgID        int64  `xml:"MsgId"`
 }
 
-func unmarshalMsg(data []byte) (msg Text, err error) {
-	xml.Unmarshal(data, &msg)
-	return msg, nil
-}
+func NewText(data []byte) Text {
+	var t Text
+	xml.Unmarshal(data, &t)
+	return t
 
-var templateText = `
+}
+func (t Text) Marshal() []byte {
+	data, _ := xml.Marshal(t)
+	return data
+}
+func (t Text) String() string {
+	var templateText = `
 <xml>
 <ToUserName><![CDATA[%s]]></ToUserName>
-<FromUserName><![CDATA[gh_3fb3b0b8f2fa]]></FromUserName>
+<FromUserName><![CDATA[%s]]></FromUserName>
 <CreateTime>%d</CreateTime>
 <MsgType><![CDATA[text]]></MsgType>
 <Content><![CDATA[%s]]></Content>
 </xml>`
+	return fmt.Sprintf(templateText, t.ToUserName, t.FromUserName, time.Now().Unix(), t.Content, t.MsgID)
 
-func marshaMsg(customerID string, content string) (msg string) {
-	return fmt.Sprintf(templateText, customerID, time.Now().Unix(), content)
 }
