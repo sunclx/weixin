@@ -15,6 +15,7 @@ func main() {
 
 	//监听github.com的自动更新
 	server.Post("/update", updateHandle)
+	server.Get("/update", updateHandle)
 
 	//启动服务
 	server.Listen(":80")
