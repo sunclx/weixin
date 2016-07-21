@@ -81,6 +81,7 @@ func main() {
 
 		//检验是否是微信服务器的请求
 		if !validateURL(c.Params) {
+			fmt.Println("验证错误", c.Params)
 			c.Write("404")
 			return
 		}
