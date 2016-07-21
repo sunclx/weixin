@@ -10,9 +10,9 @@ func handlerMux(c *iris.Context) {
 		handleImage(c)
 	case MsgTypeVoice:
 		handleVoice(c)
-	case MsgTypeText:
+	case MsgTypeVideo:
 		handleVideo(c)
-	case MsgTypeText:
+	case MsgTypeMusic:
 		handleMusic(c)
 	case MsgTypeNews:
 		handleNews(c)
