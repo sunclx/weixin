@@ -68,9 +68,9 @@ func requestHandle(c *iris.Context) []byte {
 func main() {
 	server := iris.New()
 
-	server.HandleFunc("", "/", func(c *iris.Context) {
+	server.HandleFunc(iris.MethodPost, "/", func(c *iris.Context) {
 		//记录请求
-		fmt.Println(c.MethodString(), c.URI())
+		fmt.Println(c.MethodString(), c.URI(), c.RemoteAddr())
 
 		//建议域名是否真确
 		if hostname := c.HostString(); hostname != "weixin.chenlixin.net" {
@@ -80,37 +80,29 @@ func main() {
 		}
 
 		//检验是否是微信服务器的请求
-		if !validateURL(c.Params) {
-			fmt.Println("验证错误", c.Params)
+		signature := c.URLParam("signature")
+		timestamp := c.URLParam("timestamp")
+		nonce := c.URLParam("nonce")
+		//openid:=c.URLParam("openid")
+		if !validateURL(signature, timestamp, nonce) {
+			c.Log("参数错误%s,%s,%s.\n", signature, timestamp, nonce)
 			c.Write("404")
 			return
 		}
 
 		//处理请求数据
 		data := c.PostBody()
-		fmt.Printf("%s\n", data)
+		c.Log("%s\n", data)
 		requestHandle(c)
 
 		var msg Text
 		c.ReadXML(&msg)
-		fmt.Printf("%s\n", data)
+		c.Log("%s\n", data)
 
 		c.Write("")
 
 	})
 	server.Listen(":80")
-	// http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-	// 	fmt.Println(r.Method, r.RequestURI, r.RemoteAddr)
-	// 	if !validate(r) {
-	// 		w.WriteHeader(404)
-	// 		w.Write([]byte("404"))
-	// 		return
-	// 	}
-
-	// 	data := requestHandle(r)
-	// 	w.Write(data)
-
-	// })
 
 	// http.HandleFunc("/update", func(w http.ResponseWriter, r *http.Request) {
 	// 	fmt.Println(r.Method, r.RequestURI, r.RemoteAddr)
