@@ -52,7 +52,7 @@ func main() {
 	})
 
 	//监听github.com的自动更新
-	server.Post("/update", func(c *iris.Context) {
+	server.HandleFunc("", "/update", func(c *iris.Context) {
 		//记录请求
 		fmt.Println(c.MethodString(), c.URI(), c.RemoteAddr())
 
