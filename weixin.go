@@ -69,6 +69,9 @@ func main() {
 	server := iris.New()
 
 	server.HandleFunc("", "/", func(c *iris.Context) {
+		//记录请求
+		fmt.Println(c.MethodString(), c.URI())
+
 		//建议域名是否真确
 		if hostname := c.HostString(); hostname != "weixin.chenlixin.net" {
 			c.Log("异常域名:", hostname)
