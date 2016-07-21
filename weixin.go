@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os/exec"
 
 	"github.com/kataras/iris"
 )
@@ -68,7 +69,7 @@ func requestHandle(c *iris.Context) []byte {
 func main() {
 	server := iris.New()
 
-	server.HandleFunc(iris.MethodPost, "/", func(c *iris.Context) {
+	server.Post("/", func(c *iris.Context) {
 		//记录请求
 		fmt.Println(c.MethodString(), c.URI(), c.RemoteAddr())
 
@@ -102,17 +103,22 @@ func main() {
 		c.Write("")
 
 	})
+
+	server.Post("/update", func(c *iris.Context) {
+		//记录请求
+		fmt.Println(c.MethodString(), c.URI(), c.RemoteAddr())
+
+		//自动更新
+		cmd := exec.Command("go", "get", "-u", "github.com/sunclx/weixin")
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println("errors:", err)
+
+		}
+	})
 	server.Listen(":80")
 
 	// http.HandleFunc("/update", func(w http.ResponseWriter, r *http.Request) {
 	// 	fmt.Println(r.Method, r.RequestURI, r.RemoteAddr)
-	// 	cmd := exec.Command("go", "get", "-u", "github.com/sunclx/weixin")
-	// 	err := cmd.Run()
-	// 	if err != nil {
-	// 		fmt.Println("errors:")
-	// 		fmt.Println(err)
-	// 	}
 
-	// })
-	// http.ListenAndServe(":80", nil)
 }
