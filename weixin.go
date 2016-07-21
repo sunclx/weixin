@@ -47,10 +47,6 @@ func mainHandle(c *iris.Context) {
 		return
 	}
 
-	//过滤openid
-	openid := c.URLParam("openid")
-	filteOpenid(openid)
-
 	//处理请求数据
 	handlerMux(c)
 }
@@ -71,8 +67,4 @@ func updateHandle(c *iris.Context) {
 func logConect(c *iris.Context) {
 	//记录请求
 	fmt.Println(c.MethodString(), c.URI(), c.RemoteAddr())
-}
-
-func filteOpenid(openid string) {
-
 }

@@ -9,6 +9,16 @@ import (
 	"github.com/kataras/iris"
 )
 
+var db *bolt.DB
+
+func init() {
+	var err error
+	db, err = bolt.Open("data.db", 0600, nil)
+	if err != nil {
+		return
+	}
+}
+
 func handlerMux(c *iris.Context) {
 	var t msgType
 	c.ReadXML(&t)
@@ -35,30 +45,23 @@ func handleText(c *iris.Context) {
 	msg := NewText(c.PostBody())
 	fmt.Println(msg)
 
-	db, err := bolt.Open("data.db", 0600, nil)
-	if err != nil {
-		return
-	}
-	defer db.Close()
 	rmsg := Text{
 		ToUserName:   msg.FromUserName,
 		FromUserName: developerID,
 		CreateTime:   time.Now().Unix(),
 	}
 
-	content := msg.Content
-	if strings.HasPrefix(content, "我的学号是") {
-		content = content[len(content)-8:]
-		db.Update(func(tx *bolt.Tx) error {
+	db.Update(func(tx *bolt.Tx) error {
+		content := msg.Content
+		if strings.HasPrefix(content, "我的学号是") {
+			content = content[len(content)-8:]
 			b := tx.Bucket([]byte("default"))
 			err := b.Put([]byte(msg.FromUserName), []byte(content))
-			rmsg.Content = fmt.Sprintf("你的学号是%s，你是%s", content, "我们班的同学")
+			rmsg.Content = fmt.Sprintf("你的学号是%s\n", content)
 
 			return err
-		})
-	}
+		}
 
-	db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("default"))
 		data := b.Get([]byte(msg.FromUserName))
 		if data == nil {
