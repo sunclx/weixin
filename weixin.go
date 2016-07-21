@@ -11,9 +11,15 @@ func main() {
 	server := iris.New()
 
 	//监听微信服务器的信息
-	server.Post("/", func(c *iris.Context) {
+	server.HandleFunc("", "/", func(c *iris.Context) {
 		//记录请求
 		fmt.Println(c.MethodString(), c.URI(), c.RemoteAddr())
+
+		//排除非POST请求
+		if c.MethodString() != iris.MethodPost {
+			c.WriteString("404")
+			return
+		}
 
 		//建议域名是否真确
 		if hostname := c.HostString(); hostname != "weixin.chenlixin.net" {
