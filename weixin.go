@@ -68,7 +68,7 @@ func requestHandle(r *http.Request) []byte {
 }
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(r.Method, r.RequestURI)
+		fmt.Println(r.Method, r.RequestURI, r.RemoteAddr)
 		if !validate(r) {
 			w.WriteHeader(404)
 			w.Write([]byte("404"))
@@ -83,7 +83,7 @@ func main() {
 	})
 
 	http.HandleFunc("/update", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(r.Method, r.RequestURI)
+		fmt.Println(r.Method, r.RequestURI, r.RemoteAddr)
 		cmd := exec.Command("go", "get", "-u", "github.com/sunclx/weixin")
 		err := cmd.Run()
 		if err != nil {
