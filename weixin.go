@@ -10,12 +10,12 @@ import (
 func main() {
 	server := iris.New()
 
-	//监听微信服务器的信息
-	server.HandleFunc("", "/", mainHandle)
-
 	//监听github.com的自动更新
 	server.Post("/update", updateHandle)
 	server.Get("/update", updateHandle)
+
+	//监听微信服务器的信息
+	server.HandleFunc("", "/*any", mainHandle)
 
 	//启动服务
 	server.Listen(":80")
