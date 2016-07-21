@@ -6,6 +6,8 @@ func handlerMux(c *iris.Context) {
 	var t msgType
 	c.ReadXML(&t)
 	switch t.MsgType {
+	case MsgTypeText:
+		handleText(c)
 	case MsgTypeImage:
 		handleImage(c)
 	case MsgTypeVoice:
