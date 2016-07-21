@@ -23,6 +23,7 @@ func unmarshalMsg(r *http.Request) (msg Text, err error) {
 		return
 	}
 	xml.Unmarshal(data, &msg)
+	fmt.Printf("%#v\n", msg)
 	return msg, nil
 }
 

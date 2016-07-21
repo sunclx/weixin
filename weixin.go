@@ -77,8 +77,7 @@ func main() {
 		data := requestHandle(r)
 		w.Write(data)
 
-		fmt.Println(r.URL.String())
-		fmt.Println(string(data))
+		fmt.Print(r.Host, "/", r.URL.String(), "\n", string(data), "\n")
 
 	})
 
