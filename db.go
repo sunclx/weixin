@@ -6,7 +6,7 @@ var db *bolt.DB
 
 func init() {
 	var err error
-	db, err = bolt.Open("~/data.db", 0600, nil)
+	db, err = bolt.Open("/root/ddata.db", 0600, nil)
 	if err != nil {
 		return
 	}
