@@ -21,7 +21,7 @@ func handlePhone(t Text) string {
 	var n Contact
 	err := n.Get(name)
 	if err != nil {
-		return fmt.Sprintf("没有的%s号码", name)
+		return fmt.Sprintf("没有%s的号码", name)
 	}
 
 	return fmt.Sprintf("%s %s", name, n.PhoneNumber)
