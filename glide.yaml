@@ -1,0 +1,6 @@
+package: github.com/sunclx/weixin
+import:
+- package: github.com/boltdb/bolt
+  version: ^1.2.1
+- package: github.com/kataras/iris
+  version: ^4.0.0
