@@ -35,12 +35,13 @@ var boltbrowserweb *boltBrowerWeb
 var Db *bolt.DB
 
 func (b *boltBrowerWeb) Index(c *iris.Context) {
-
+	logConect(c)
 	c.Redirect("/web/html/layout.html", 301)
 
 }
 
 func (b *boltBrowerWeb) CreateBucket(c *iris.Context) {
+	logConect(c)
 
 	if c.FormValueString("bucket") == "" {
 		c.Text(200, "no bucket name | n")
@@ -60,6 +61,7 @@ func (b *boltBrowerWeb) CreateBucket(c *iris.Context) {
 }
 
 func (b *boltBrowerWeb) DeleteBucket(c *iris.Context) {
+	logConect(c)
 
 	if c.FormValueString("bucket") == "" {
 		c.Text(200, "no bucket name | n")
@@ -82,6 +84,7 @@ func (b *boltBrowerWeb) DeleteBucket(c *iris.Context) {
 }
 
 func (b *boltBrowerWeb) DeleteKey(c *iris.Context) {
+	logConect(c)
 
 	if c.FormValueString("bucket") == "" || c.FormValueString("key") == "" {
 		c.Text(200, "no bucket name or key | n")
@@ -112,6 +115,7 @@ func (b *boltBrowerWeb) DeleteKey(c *iris.Context) {
 }
 
 func (b *boltBrowerWeb) Put(c *iris.Context) {
+	logConect(c)
 
 	if c.FormValueString("bucket") == "" || c.FormValueString("key") == "" {
 		c.Text(200, "no bucket name or key | n")
@@ -142,6 +146,7 @@ func (b *boltBrowerWeb) Put(c *iris.Context) {
 }
 
 func (b *boltBrowerWeb) Get(c *iris.Context) {
+	logConect(c)
 
 	res := []string{"nok", ""}
 
@@ -183,6 +188,7 @@ type Result struct {
 }
 
 func (b *boltBrowerWeb) PrefixScan(c *iris.Context) {
+	logConect(c)
 
 	res := Result{Result: "nok"}
 
@@ -262,6 +268,7 @@ func (b *boltBrowerWeb) PrefixScan(c *iris.Context) {
 }
 
 func (b *boltBrowerWeb) Buckets(c *iris.Context) {
+	logConect(c)
 
 	res := []string{}
 
