@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/boltdb/bolt"
 )
@@ -13,7 +14,8 @@ const (
 	PrefixStudentID     string = "学号 "
 )
 
-func handlePhone(content string) string {
+func handlePhone(t Text) string {
+	content := t.Content
 	name := content[len(PrefixPhone):]
 	var msg string
 
@@ -32,6 +34,21 @@ func handlePhone(content string) string {
 		msg = fmt.Sprintf("%s %s", name, string(phone))
 
 		return nil
+	})
+	return msg
+}
+
+func handleBindPhone(t Text) string {
+	content := t.Content
+	result := strings.Fields(content)
+	name, phone := result[1], result[2]
+	var msg string
+
+	db.Update(func(tx *bolt.Tx) error {
+		bx := tx.Bucket([]byte("phone"))
+		err := bx.Put([]byte(name), []byte(phone))
+
+		return err
 	})
 	return msg
 }

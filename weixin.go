@@ -53,6 +53,8 @@ func mainHandle(c *iris.Context) {
 	handlerMux(c)
 }
 
+var verbose = false
+
 func updateHandle(c *iris.Context) {
 	logConect(c)
 
@@ -68,6 +70,10 @@ func updateHandle(c *iris.Context) {
 }
 
 func logConect(c *iris.Context) {
+	if !verbose {
+		return
+	}
+
 	//记录请求
 	fmt.Println("记录信息：", c.MethodString(), c.URI(), c.RemoteAddr())
 }
