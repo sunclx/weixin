@@ -8,6 +8,8 @@ import (
 )
 
 func main() {
+	go dbedit()
+
 	server := iris.New()
 
 	//监听github.com的自动更新
