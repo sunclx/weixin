@@ -42,7 +42,6 @@ func RText(openid, content string) Text {
 	return Text{
 		ToUserName:   openid,
 		FromUserName: developerID,
-		CreateTime:   time.Now().Unix(),
 		MsgType:      "text",
 		Content:      content,
 	}
@@ -61,6 +60,6 @@ func (t Text) String() string {
 <MsgType><![CDATA[text]]></MsgType>
 <Content><![CDATA[%s]]></Content>
 </xml>`
-	return fmt.Sprintf(templateText, t.ToUserName, t.FromUserName, time.Now().Unix(), t.Content, t.MsgID)
+	return fmt.Sprintf(templateText, t.ToUserName, t.FromUserName, time.Now().Unix(), t.Content)
 
 }
