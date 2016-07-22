@@ -32,8 +32,6 @@ type boltBrowerWeb struct{}
 
 var boltbrowserweb *boltBrowerWeb
 
-var Db *bolt.DB
-
 func (b *boltBrowerWeb) Index(c *iris.Context) {
 	logConect(c)
 	c.Redirect("/web/html/layout.html", 301)
@@ -48,7 +46,7 @@ func (b *boltBrowerWeb) CreateBucket(c *iris.Context) {
 
 	}
 
-	Db.Update(func(tx *bolt.Tx) error {
+	db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte(c.FormValueString("bucket")))
 		b = b
 		if err != nil {
@@ -67,7 +65,7 @@ func (b *boltBrowerWeb) DeleteBucket(c *iris.Context) {
 		c.Text(200, "no bucket name | n")
 	}
 
-	Db.Update(func(tx *bolt.Tx) error {
+	db.Update(func(tx *bolt.Tx) error {
 		err := tx.DeleteBucket([]byte(c.FormValueString("bucket")))
 
 		if err != nil {
@@ -90,7 +88,7 @@ func (b *boltBrowerWeb) DeleteKey(c *iris.Context) {
 		c.Text(200, "no bucket name or key | n")
 	}
 
-	Db.Update(func(tx *bolt.Tx) error {
+	db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte(c.FormValueString("bucket")))
 		b = b
 		if err != nil {
@@ -121,7 +119,7 @@ func (b *boltBrowerWeb) Put(c *iris.Context) {
 		c.Text(200, "no bucket name or key | n")
 	}
 
-	Db.Update(func(tx *bolt.Tx) error {
+	db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte(c.FormValueString("bucket")))
 		b = b
 		if err != nil {
@@ -156,7 +154,7 @@ func (b *boltBrowerWeb) Get(c *iris.Context) {
 		c.JSON(200, res)
 	}
 
-	Db.View(func(tx *bolt.Tx) error {
+	db.View(func(tx *bolt.Tx) error {
 
 		b := tx.Bucket([]byte(c.FormValueString("bucket")))
 
@@ -204,7 +202,7 @@ func (b *boltBrowerWeb) PrefixScan(c *iris.Context) {
 
 	if c.FormValueString("key") == "" {
 
-		Db.View(func(tx *bolt.Tx) error {
+		db.View(func(tx *bolt.Tx) error {
 			// Assume bucket exists and has keys
 			b := tx.Bucket([]byte(c.FormValueString("bucket")))
 
@@ -234,7 +232,7 @@ func (b *boltBrowerWeb) PrefixScan(c *iris.Context) {
 
 	} else {
 
-		Db.View(func(tx *bolt.Tx) error {
+		db.View(func(tx *bolt.Tx) error {
 			// Assume bucket exists and has keys
 			b := tx.Bucket([]byte(c.FormValueString("bucket"))).Cursor()
 
@@ -272,7 +270,7 @@ func (b *boltBrowerWeb) Buckets(c *iris.Context) {
 
 	res := []string{}
 
-	Db.View(func(tx *bolt.Tx) error {
+	db.View(func(tx *bolt.Tx) error {
 
 		return tx.ForEach(func(name []byte, _ *bolt.Bucket) error {
 
