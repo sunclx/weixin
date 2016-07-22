@@ -55,7 +55,8 @@ func updateHandle(c *iris.Context) {
 	logConect(c)
 
 	//执行命令
-	cmd := exec.Command("go", "get", "-u", "github.com/sunclx/weixin")
+	cmd := exec.Command("git", "pull")
+	cmd.Dir = "/root/go/src/github.com/sunclx/weixin"
 	err := cmd.Run()
 	if err != nil {
 		fmt.Println("errors:", err)
