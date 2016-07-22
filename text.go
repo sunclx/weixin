@@ -19,11 +19,6 @@ func handlePhone(t Text) string {
 	name := content[len(PrefixPhone):]
 	var msg string
 
-	db.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte("phone"))
-		return err
-	})
-
 	db.View(func(tx *bolt.Tx) error {
 		bx := tx.Bucket([]byte("phone"))
 		phone := bx.Get([]byte(name))
@@ -42,7 +37,6 @@ func handleBindPhone(t Text) string {
 	content := t.Content
 	result := strings.Fields(content)
 	name, phone := result[1], result[2]
-	var msg string
 
 	db.Update(func(tx *bolt.Tx) error {
 		bx := tx.Bucket([]byte("phone"))
@@ -50,7 +44,8 @@ func handleBindPhone(t Text) string {
 
 		return err
 	})
-	return msg
+
+	return "设置成功"
 }
 
 // db.Update(func(tx *bolt.Tx) error {
