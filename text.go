@@ -23,6 +23,7 @@ func handlePhone(content string) string {
 		phone := bx.Get([]byte(name))
 		if phone == nil {
 			msg = "无此人号码"
+			return nil
 		}
 		msg = string(phone)
 
