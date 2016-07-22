@@ -1,6 +1,10 @@
 package main
 
-import "github.com/boltdb/bolt"
+import (
+	"fmt"
+
+	"github.com/boltdb/bolt"
+)
 
 const (
 	PrefixPhone         string = "手机 "
@@ -22,10 +26,10 @@ func handlePhone(content string) string {
 		bx := tx.Bucket([]byte("phone"))
 		phone := bx.Get([]byte(name))
 		if phone == nil {
-			msg = "无此人号码"
+			msg = fmt.Sprintf("没有的%s号码", name)
 			return nil
 		}
-		msg = string(phone)
+		msg = fmt.Sprintf("%s %s", name, string(phone))
 
 		return nil
 	})
