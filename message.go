@@ -32,11 +32,20 @@ type Text struct {
 	MsgID        int64  `xml:"MsgId"`
 }
 
-func NewText(data []byte) Text {
+func ParseText(data []byte) Text {
 	var t Text
 	xml.Unmarshal(data, &t)
 	return t
 
+}
+func RText(openid, content string) Text {
+	t := Text{
+		ToUserName:   openid,
+		FromUserName: developerID,
+		CreateTime:   time.Now().Unix(),
+		MsgType:      "text",
+		Content:      content,
+	}
 }
 func (t Text) Marshal() []byte {
 	data, _ := xml.Marshal(t)

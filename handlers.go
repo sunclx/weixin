@@ -3,21 +3,9 @@ package main
 import (
 	"fmt"
 	"strings"
-	"time"
 
-	"github.com/boltdb/bolt"
 	"github.com/kataras/iris"
 )
-
-var db *bolt.DB
-
-func init() {
-	var err error
-	db, err = bolt.Open("data.db", 0600, nil)
-	if err != nil {
-		return
-	}
-}
 
 func handlerMux(c *iris.Context) {
 	var t msgType
@@ -42,47 +30,21 @@ func handlerMux(c *iris.Context) {
 }
 
 func handleText(c *iris.Context) {
-	msg := NewText(c.PostBody())
+	msg := ParseText(c.PostBody())
 	fmt.Println(msg)
 
-	rmsg := Text{
-		ToUserName:   msg.FromUserName,
-		FromUserName: developerID,
-		CreateTime:   time.Now().Unix(),
+	openid := msg.FromUserName
+	content := msg.Content
+
+	var rcontent string
+	switch {
+	case strings.HasPrefix(content, PrefixPhone):
+		rcontent = handlePhone(content)
+	default:
+		rcontent = "你的消息格式暂不支持"
 	}
 
-	db.Update(func(tx *bolt.Tx) error {
-		content := msg.Content
-		if strings.HasPrefix(content, "我的学号是") {
-			content = content[len(content)-8:]
-			b := tx.Bucket([]byte("default"))
-			err := b.Put([]byte(msg.FromUserName), []byte(content))
-			rmsg.Content = fmt.Sprintf("你的学号是%s\n", content)
-
-			return err
-		}
-
-		b := tx.Bucket([]byte("default"))
-		data := b.Get([]byte(msg.FromUserName))
-		if data == nil {
-			rmsg.Content = `请输入"我的学号是00000000"`
-			return nil
-		}
-
-		if string(data) == "09170515" {
-			rmsg.Content = "你是跳跳，一个大美女"
-			return nil
-		}
-		if string(data) == "09170512" {
-			rmsg.Content = "你是乐乐，一个大美女"
-			return nil
-		}
-		rmsg.Content = fmt.Sprintf("你的学号是%s，你是%s", data, "我们班的同学")
-
-		return nil
-	})
-
-	c.WriteString(rmsg.String())
+	c.WriteString(RText(openid, rcontent).String())
 
 }
 
