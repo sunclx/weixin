@@ -19,17 +19,13 @@ func handlePhone(t Text) string {
 	name := content[len(PrefixPhone):]
 	var msg string
 
-	db.View(func(tx *bolt.Tx) error {
-		bx := tx.Bucket([]byte("phone"))
-		phone := bx.Get([]byte(name))
-		if phone == nil {
-			msg = fmt.Sprintf("没有的%s号码", name)
-			return nil
-		}
-		msg = fmt.Sprintf("%s %s", name, string(phone))
+	var n Contact
+	err := n.Get(name)
+	if err != nil {
+		msg = fmt.Sprintf("没有的%s号码", name)
+	}
+	msg = fmt.Sprintf("%s %s", name, n.PhoneNumber)
 
-		return nil
-	})
 	return msg
 }
 
