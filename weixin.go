@@ -69,5 +69,5 @@ func updateHandle(c *iris.Context) {
 
 func logConect(c *iris.Context) {
 	//记录请求
-	fmt.Println(c.MethodString(), c.URI(), c.RemoteAddr())
+	fmt.Println("记录信息：", c.MethodString(), c.URI(), c.RemoteAddr())
 }
