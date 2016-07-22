@@ -22,41 +22,44 @@ func handlePhone(content string) string {
 		bx := tx.Bucket([]byte("phone"))
 		phone := bx.Get([]byte(name))
 		if phone == nil {
-			msg := "无此人号码"
+			msg = "无此人号码"
 		}
 		msg = string(phone)
 
 		return nil
 	})
-	// db.Update(func(tx *bolt.Tx) error {
-	// 	content := msg.Content
-	// 	if strings.HasPrefix(content, "我的学号是") {
-	// 		content = content[len(content)-8:]
-	// 		b := tx.Bucket([]byte("default"))
-	// 		err := b.Put([]byte(msg.FromUserName), []byte(content))
-	// 		rmsg.Content = fmt.Sprintf("你的学号是%s\n", content)
+	return msg
+}
 
-	// 		return err
-	// 	}
+// db.Update(func(tx *bolt.Tx) error {
+// 	content := msg.Content
+// 	if strings.HasPrefix(content, "我的学号是") {
+// 		content = content[len(content)-8:]
+// 		b := tx.Bucket([]byte("default"))
+// 		err := b.Put([]byte(msg.FromUserName), []byte(content))
+// 		rmsg.Content = fmt.Sprintf("你的学号是%s\n", content)
 
-	// 	b := tx.Bucket([]byte("default"))
-	// 	data := b.Get([]byte(msg.FromUserName))
-	// 	if data == nil {
-	// 		rmsg.Content = `请输入"我的学号是00000000"`
-	// 		return nil
-	// 	}
+// 		return err
+// 	}
 
-	// 	if string(data) == "09170515" {
-	// 		rmsg.Content = "你是跳跳，一个大美女"
-	// 		return nil
-	// 	}
-	// 	if string(data) == "09170512" {
-	// 		rmsg.Content = "你是乐乐，一个大美女"
-	// 		return nil
-	// 	}
-	// 	rmsg.Content = fmt.Sprintf("你的学号是%s，你是%s", data, "我们班的同学")
+// 	b := tx.Bucket([]byte("default"))
+// 	data := b.Get([]byte(msg.FromUserName))
+// 	if data == nil {
+// 		rmsg.Content = `请输入"我的学号是00000000"`
+// 		return nil
+// 	}
 
-	// 	return nil
-	// })
+// 	if string(data) == "09170515" {
+// 		rmsg.Content = "你是跳跳，一个大美女"
+// 		return nil
+// 	}
+// 	if string(data) == "09170512" {
+// 		rmsg.Content = "你是乐乐，一个大美女"
+// 		return nil
+// 	}
+// 	rmsg.Content = fmt.Sprintf("你的学号是%s，你是%s", data, "我们班的同学")
 
-	// c.WriteString(rmsg.String())
+// 	return nil
+// })
+
+// c.WriteString(rmsg.String())

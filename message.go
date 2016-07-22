@@ -39,13 +39,14 @@ func ParseText(data []byte) Text {
 
 }
 func RText(openid, content string) Text {
-	t := Text{
+	return Text{
 		ToUserName:   openid,
 		FromUserName: developerID,
 		CreateTime:   time.Now().Unix(),
 		MsgType:      "text",
 		Content:      content,
 	}
+
 }
 func (t Text) Marshal() []byte {
 	data, _ := xml.Marshal(t)
