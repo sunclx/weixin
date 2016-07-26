@@ -10,4 +10,15 @@ func init() {
 	if err != nil {
 		return
 	}
+
+	db.Update(func(tx *bolt.Tx) error {
+		buckets := []string{"default", "Contact", "phone", "Person", "NameID"}
+		for _, bucket := range buckets {
+			_, err := tx.CreateBucketIfNotExists([]byte(bucket))
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
