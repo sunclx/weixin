@@ -1,12 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
-	"time"
 
-	"github.com/boltdb/bolt"
 	"github.com/kataras/iris"
 )
 
@@ -50,59 +47,6 @@ func handleText(c *iris.Context) {
 	}
 
 	c.WriteString(RText(openid, rcontent).String())
-}
-
-type person struct {
-	StudentID  string
-	Name       string
-	Birthday   time.Time
-	BirthPlace string
-	Location   string
-}
-
-func personByByte(data []byte) *person {
-	var p person
-	err := json.Unmarshal(data, &p)
-	if err != nil {
-		return nil
-	}
-	return &p
-}
-
-func (p *person) JSON() string {
-	s, err := json.Marshal(p)
-	if err != nil {
-		return ""
-	}
-	return string(s)
-}
-func (p *person) Get() {
-	if p.StudentID == "" {
-		p = nil
-		return
-	}
-
-	err := db.View(func(tx *bolt.Tx) error {
-		bx := tx.Bucket([]byte("persons"))
-		bp := bx.Get([]byte(p.StudentID))
-		p = personByByte(bp)
-		return nil
-	})
-	if err != nil {
-		p = nil
-		return
-	}
-}
-func (p *person) Put() {
-	if p.StudentID == "" {
-		return
-	}
-
-	db.Update(func(tx *bolt.Tx) error {
-		bx := tx.Bucket([]byte("persons"))
-		return bx.Put([]byte(p.StudentID), []byte(p.JSON()))
-	})
-
 }
 
 func handleImage(c *iris.Context) {}
