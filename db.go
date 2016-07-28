@@ -12,7 +12,7 @@ func init() {
 	}
 
 	db.Update(func(tx *bolt.Tx) error {
-		buckets := []string{"default", "Contact", "phone", "Person", "NameID"}
+		buckets := []string{"default", "Contact", "Phone", "Person", "NameID"}
 		for _, bucket := range buckets {
 			_, err := tx.CreateBucketIfNotExists([]byte(bucket))
 			if err != nil {
