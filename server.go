@@ -58,18 +58,23 @@ func (s *Server) Run(addr string) error {
 type ServerMux struct {
 	defaultHandler Handler
 	handlers       []Handler
-	server         *Server
 }
 
 func New() *ServerMux {
 	return &ServerMux{
 		handlers: make([]Handler, 0, 8),
-		server:   NewServer(),
 	}
 }
-
+func (s *ServerMux) ServeMessage(ctx *Context) {
+	ctx.handlers = s.handlers
+	ctx.Start()
+	ctx.Next()
+}
 func (s *ServerMux) Run(addr string) error {
-	return s.server.Run(addr)
+	server := NewServer()
+	server.handler = s
+
+	return server.Run(addr)
 }
 func (s *ServerMux) Default(handler Handler) *ServerMux {
 	s.defaultHandler = handler

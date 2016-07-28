@@ -64,17 +64,23 @@ type Context struct {
 	//Random      []byte // 当前消息加密所用的 random, 16-bytes
 	//AppId       string // 当前消息加密所用的 AppId
 
-	handlers *Handlers
+	index    int
+	handlers []Handler
 
 	kvs map[string]interface{}
 }
 
-func (ctx *Context) Next() {
-	ctx.handlers.Begin(ctx)
-	for ctx.handlers.IsEnd() {
-		ctx.handlers.Next(ctx)
-	}
+func (ctx *Context) Start() {
+	ctx.handlers[ctx.index].ServeMessage(ctx)
 }
+
+func (ctx *Context) Next() {
+	for ; ctx.index < len(ctx.handlers); ctx.index++ {
+		ctx.handlers[ctx.index].ServeMessage(ctx)
+	}
+	ctx.index--
+}
+
 func (ctx *Context) Write(data []byte) (int, error) {
 	return ctx.ResponseWriter.Write(data)
 }
