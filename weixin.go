@@ -1,33 +1,31 @@
 package main
 
-import (
-	"fmt"
-	"time"
-)
+import "github.com/boltdb/bolt"
+
+var db *bolt.DB
 
 func main() {
-	//go dbedit()
+	//设置数据库
+	var err error
+	db, err = bolt.Open("/root/data.db", 0600, nil)
+	if err != nil {
+		return
+	}
 
+	db.Update(func(tx *bolt.Tx) error {
+		buckets := []string{"default", "Contact", "Phone", "Person", "NameID"}
+		for _, bucket := range buckets {
+			_, err := tx.CreateBucketIfNotExists([]byte(bucket))
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+
+	//启动服务
 	s := New()
 	s.UseFunc(logHandler)
-	s.UseFunc(mainHandler)
-
+	s.UseFunc(testHandler)
 	s.Run(":80")
-}
-
-func logHandler(c *Context) {
-	r := c.Request
-	fmt.Println(r.RemoteAddr, r.Method, r.Host, r.URL.Path, r.URL.RawQuery)
-}
-
-func mainHandler(c *Context) {
-
-	testID := "success-serveMux"
-	c.WriteString(fmt.Sprintf(`<xml>
-<ToUserName><![CDATA[%s]]></ToUserName>
-<FromUserName><![CDATA[%s]]></FromUserName>
-<CreateTime>%d</CreateTime>
-<MsgType><![CDATA[text]]></MsgType>
-<Content><![CDATA[%s]]></Content>
-</xml>`, c.OpenID, "gh_3fb3b0b8f2fa", time.Now().Unix(), testID))
 }

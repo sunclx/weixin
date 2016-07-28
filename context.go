@@ -2,6 +2,7 @@ package main
 
 import "net/http"
 
+//Handler todo
 type Handler interface {
 	ServeMessage(ctx *Context)
 }
@@ -11,36 +12,8 @@ type HandlerFunc func(*Context)
 
 var _ Handler = HandlerFunc(nil)
 
+// ServeMessage todo
 func (fn HandlerFunc) ServeMessage(ctx *Context) { fn(ctx) }
-
-//Handlers ...
-type Handlers struct {
-	index    int
-	handlers []Handler
-}
-
-func (h *Handlers) First(ctx *Context) {
-	h.index = 0
-	h.handlers[h.index].ServeMessage(ctx)
-}
-func (h *Handlers) Begin(ctx *Context) {
-	h.handlers[h.index].ServeMessage(ctx)
-}
-func (h *Handlers) Next(ctx *Context) {
-	h.index++
-	if h.index >= len(h.handlers) {
-		h.index--
-		return
-	}
-	h.handlers[h.index].ServeMessage(ctx)
-}
-
-func (h *Handlers) IsEnd() bool {
-	if h.index+1 >= len(h.handlers) {
-		return true
-	}
-	return false
-}
 
 //Context ...
 type Context struct {
@@ -67,13 +40,15 @@ type Context struct {
 	index    int
 	handlers []Handler
 
-	kvs map[string]interface{}
+	//kvs map[string]interface{}
 }
 
+// Start todo
 func (ctx *Context) Start() {
 	ctx.handlers[ctx.index].ServeMessage(ctx)
 }
 
+// Next todo
 func (ctx *Context) Next() {
 	for ; ctx.index < len(ctx.handlers); ctx.index++ {
 		ctx.handlers[ctx.index].ServeMessage(ctx)
@@ -85,6 +60,7 @@ func (ctx *Context) Write(data []byte) (int, error) {
 	return ctx.ResponseWriter.Write(data)
 }
 
+// WriteString todo
 func (ctx *Context) WriteString(s string) {
 	ctx.Write([]byte(s))
 }
