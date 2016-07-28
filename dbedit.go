@@ -1,286 +1,274 @@
 package main
 
-import (
-	"bytes"
-	"fmt"
+// import (
+// 	"bytes"
+// 	"fmt"
 
-	"github.com/boltdb/bolt"
-	"github.com/kataras/iris"
-)
+// 	"github.com/boltdb/bolt"
+// 	"github.com/kataras/iris"
+// )
 
-func dbedit() {
+// func dbedit() {
 
-	r := iris.New()
+// 	r := iris.New()
 
-	r.Get("/", boltbrowserweb.Index)
+// 	r.Get("/", boltbrowserweb.Index)
 
-	r.Get("/buckets", boltbrowserweb.Buckets)
-	r.Post("/createBucket", boltbrowserweb.CreateBucket)
-	r.Post("/put", boltbrowserweb.Put)
-	r.Post("/get", boltbrowserweb.Get)
-	r.Post("/deleteKey", boltbrowserweb.DeleteKey)
-	r.Post("/deleteBucket", boltbrowserweb.DeleteBucket)
-	r.Post("/prefixScan", boltbrowserweb.PrefixScan)
+// 	r.Get("/buckets", boltbrowserweb.Buckets)
+// 	r.Post("/createBucket", boltbrowserweb.CreateBucket)
+// 	r.Post("/put", boltbrowserweb.Put)
+// 	r.Post("/get", boltbrowserweb.Get)
+// 	r.Post("/deleteKey", boltbrowserweb.DeleteKey)
+// 	r.Post("/deleteBucket", boltbrowserweb.DeleteBucket)
+// 	r.Post("/prefixScan", boltbrowserweb.PrefixScan)
 
-	r.Static("/web", "./", -1)
+// 	r.Static("/web", "./", -1)
 
-	r.Listen(":8080")
+// 	r.Listen(":8080")
 
-}
+// }
 
-type boltBrowerWeb struct{}
+// type boltBrowerWeb struct{}
 
-var boltbrowserweb *boltBrowerWeb
+// var boltbrowserweb *boltBrowerWeb
 
-func (b *boltBrowerWeb) Index(c *iris.Context) {
-	logConect(c)
-	c.Redirect("/web/html/layout.html", 301)
+// func (b *boltBrowerWeb) Index(c *iris.Context) {
+// 	c.Redirect("/web/html/layout.html", 301)
 
-}
+// }
 
-func (b *boltBrowerWeb) CreateBucket(c *iris.Context) {
-	logConect(c)
+// func (b *boltBrowerWeb) CreateBucket(c *iris.Context) {
 
-	if c.FormValueString("bucket") == "" {
-		c.Text(200, "no bucket name | n")
+// 	if c.FormValueString("bucket") == "" {
+// 		c.Text(200, "no bucket name | n")
 
-	}
+// 	}
 
-	db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists([]byte(c.FormValueString("bucket")))
-		b = b
-		if err != nil {
-			return fmt.Errorf("create bucket: %s", err)
-		}
-		return nil
-	})
-	c.Text(200, "ok")
+// 	db.Update(func(tx *bolt.Tx) error {
+// 		b, err := tx.CreateBucketIfNotExists([]byte(c.FormValueString("bucket")))
+// 		b = b
+// 		if err != nil {
+// 			return fmt.Errorf("create bucket: %s", err)
+// 		}
+// 		return nil
+// 	})
+// 	c.Text(200, "ok")
 
-}
+// }
 
-func (b *boltBrowerWeb) DeleteBucket(c *iris.Context) {
-	logConect(c)
+// func (b *boltBrowerWeb) DeleteBucket(c *iris.Context) {
+// 	if c.FormValueString("bucket") == "" {
+// 		c.Text(200, "no bucket name | n")
+// 	}
 
-	if c.FormValueString("bucket") == "" {
-		c.Text(200, "no bucket name | n")
-	}
+// 	db.Update(func(tx *bolt.Tx) error {
+// 		err := tx.DeleteBucket([]byte(c.FormValueString("bucket")))
 
-	db.Update(func(tx *bolt.Tx) error {
-		err := tx.DeleteBucket([]byte(c.FormValueString("bucket")))
+// 		if err != nil {
 
-		if err != nil {
+// 			c.Text(200, "error no such bucket | n")
+// 			return fmt.Errorf("bucket: %s", err)
+// 		}
 
-			c.Text(200, "error no such bucket | n")
-			return fmt.Errorf("bucket: %s", err)
-		}
+// 		return nil
+// 	})
 
-		return nil
-	})
+// 	c.Text(200, "ok")
 
-	c.Text(200, "ok")
+// }
 
-}
+// func (b *boltBrowerWeb) DeleteKey(c *iris.Context) {
+// 	if c.FormValueString("bucket") == "" || c.FormValueString("key") == "" {
+// 		c.Text(200, "no bucket name or key | n")
+// 	}
 
-func (b *boltBrowerWeb) DeleteKey(c *iris.Context) {
-	logConect(c)
+// 	db.Update(func(tx *bolt.Tx) error {
+// 		b, err := tx.CreateBucketIfNotExists([]byte(c.FormValueString("bucket")))
+// 		b = b
+// 		if err != nil {
 
-	if c.FormValueString("bucket") == "" || c.FormValueString("key") == "" {
-		c.Text(200, "no bucket name or key | n")
-	}
+// 			c.Text(200, "error no such bucket | n")
+// 			return fmt.Errorf("bucket: %s", err)
+// 		}
 
-	db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists([]byte(c.FormValueString("bucket")))
-		b = b
-		if err != nil {
+// 		err = b.Delete([]byte(c.FormValueString("key")))
 
-			c.Text(200, "error no such bucket | n")
-			return fmt.Errorf("bucket: %s", err)
-		}
+// 		if err != nil {
 
-		err = b.Delete([]byte(c.FormValueString("key")))
+// 			c.Text(200, "error Deleting KV | n")
+// 			return fmt.Errorf("delete kv: %s", err)
+// 		}
 
-		if err != nil {
+// 		return nil
+// 	})
 
-			c.Text(200, "error Deleting KV | n")
-			return fmt.Errorf("delete kv: %s", err)
-		}
+// 	c.Text(200, "ok")
 
-		return nil
-	})
+// }
 
-	c.Text(200, "ok")
+// func (b *boltBrowerWeb) Put(c *iris.Context) {
+// 	if c.FormValueString("bucket") == "" || c.FormValueString("key") == "" {
+// 		c.Text(200, "no bucket name or key | n")
+// 	}
 
-}
+// 	db.Update(func(tx *bolt.Tx) error {
+// 		b, err := tx.CreateBucketIfNotExists([]byte(c.FormValueString("bucket")))
+// 		b = b
+// 		if err != nil {
 
-func (b *boltBrowerWeb) Put(c *iris.Context) {
-	logConect(c)
+// 			c.Text(200, "error  creating bucket | n")
+// 			return fmt.Errorf("create bucket: %s", err)
+// 		}
 
-	if c.FormValueString("bucket") == "" || c.FormValueString("key") == "" {
-		c.Text(200, "no bucket name or key | n")
-	}
+// 		err = b.Put([]byte(c.FormValueString("key")), []byte(c.FormValueString("value")))
 
-	db.Update(func(tx *bolt.Tx) error {
-		b, err := tx.CreateBucketIfNotExists([]byte(c.FormValueString("bucket")))
-		b = b
-		if err != nil {
+// 		if err != nil {
 
-			c.Text(200, "error  creating bucket | n")
-			return fmt.Errorf("create bucket: %s", err)
-		}
+// 			c.Text(200, "error writing KV | n")
+// 			return fmt.Errorf("create kv: %s", err)
+// 		}
 
-		err = b.Put([]byte(c.FormValueString("key")), []byte(c.FormValueString("value")))
+// 		return nil
+// 	})
 
-		if err != nil {
+// 	c.Text(200, "ok")
 
-			c.Text(200, "error writing KV | n")
-			return fmt.Errorf("create kv: %s", err)
-		}
+// }
 
-		return nil
-	})
+// func (b *boltBrowerWeb) Get(c *iris.Context) {
 
-	c.Text(200, "ok")
+// 	res := []string{"nok", ""}
 
-}
+// 	if c.FormValueString("bucket") == "" || c.FormValueString("key") == "" {
 
-func (b *boltBrowerWeb) Get(c *iris.Context) {
-	logConect(c)
+// 		res[1] = "no bucket name or key | n"
+// 		c.JSON(200, res)
+// 	}
 
-	res := []string{"nok", ""}
+// 	db.View(func(tx *bolt.Tx) error {
 
-	if c.FormValueString("bucket") == "" || c.FormValueString("key") == "" {
+// 		b := tx.Bucket([]byte(c.FormValueString("bucket")))
 
-		res[1] = "no bucket name or key | n"
-		c.JSON(200, res)
-	}
+// 		if b != nil {
 
-	db.View(func(tx *bolt.Tx) error {
+// 			v := b.Get([]byte(c.FormValueString("key")))
 
-		b := tx.Bucket([]byte(c.FormValueString("bucket")))
+// 			res[0] = "ok"
+// 			res[1] = string(v)
 
-		if b != nil {
+// 			fmt.Printf("Key: %s\n", v)
 
-			v := b.Get([]byte(c.FormValueString("key")))
+// 		} else {
 
-			res[0] = "ok"
-			res[1] = string(v)
+// 			res[1] = "error opening bucket| does it exist? | n"
 
-			fmt.Printf("Key: %s\n", v)
+// 		}
+// 		return nil
 
-		} else {
+// 	})
 
-			res[1] = "error opening bucket| does it exist? | n"
+// 	c.JSON(200, res)
 
-		}
-		return nil
+// }
 
-	})
+// type Result struct {
+// 	Result string
+// 	M      map[string]string
+// }
 
-	c.JSON(200, res)
+// func (b *boltBrowerWeb) PrefixScan(c *iris.Context) {
 
-}
+// 	res := Result{Result: "nok"}
 
-type Result struct {
-	Result string
-	M      map[string]string
-}
+// 	res.M = make(map[string]string)
 
-func (b *boltBrowerWeb) PrefixScan(c *iris.Context) {
-	logConect(c)
+// 	if c.FormValueString("bucket") == "" {
 
-	res := Result{Result: "nok"}
+// 		res.Result = "no bucket name | n"
+// 		c.JSON(200, res)
+// 	}
 
-	res.M = make(map[string]string)
+// 	count := 0
 
-	if c.FormValueString("bucket") == "" {
+// 	if c.FormValueString("key") == "" {
 
-		res.Result = "no bucket name | n"
-		c.JSON(200, res)
-	}
+// 		db.View(func(tx *bolt.Tx) error {
+// 			// Assume bucket exists and has keys
+// 			b := tx.Bucket([]byte(c.FormValueString("bucket")))
 
-	count := 0
+// 			if b != nil {
 
-	if c.FormValueString("key") == "" {
+// 				c := b.Cursor()
 
-		db.View(func(tx *bolt.Tx) error {
-			// Assume bucket exists and has keys
-			b := tx.Bucket([]byte(c.FormValueString("bucket")))
+// 				for k, v := c.First(); k != nil; k, v = c.Next() {
+// 					res.M[string(k)] = string(v)
 
-			if b != nil {
+// 					if count > 2000 {
+// 						break
+// 					}
+// 					count++
+// 				}
 
-				c := b.Cursor()
+// 				res.Result = "ok"
 
-				for k, v := c.First(); k != nil; k, v = c.Next() {
-					res.M[string(k)] = string(v)
+// 			} else {
 
-					if count > 2000 {
-						break
-					}
-					count++
-				}
+// 				res.Result = "no such bucket available | n"
 
-				res.Result = "ok"
+// 			}
 
-			} else {
+// 			return nil
+// 		})
 
-				res.Result = "no such bucket available | n"
+// 	} else {
 
-			}
+// 		db.View(func(tx *bolt.Tx) error {
+// 			// Assume bucket exists and has keys
+// 			b := tx.Bucket([]byte(c.FormValueString("bucket"))).Cursor()
 
-			return nil
-		})
+// 			if b != nil {
 
-	} else {
+// 				prefix := []byte(c.FormValueString("key"))
 
-		db.View(func(tx *bolt.Tx) error {
-			// Assume bucket exists and has keys
-			b := tx.Bucket([]byte(c.FormValueString("bucket"))).Cursor()
+// 				for k, v := b.Seek(prefix); bytes.HasPrefix(k, prefix); k, v = b.Next() {
+// 					res.M[string(k)] = string(v)
+// 					if count > 2000 {
+// 						break
+// 					}
+// 					count++
+// 				}
 
-			if b != nil {
+// 				res.Result = "ok"
 
-				prefix := []byte(c.FormValueString("key"))
+// 			} else {
 
-				for k, v := b.Seek(prefix); bytes.HasPrefix(k, prefix); k, v = b.Next() {
-					res.M[string(k)] = string(v)
-					if count > 2000 {
-						break
-					}
-					count++
-				}
+// 				res.Result = "no such bucket available | n"
 
-				res.Result = "ok"
+// 			}
 
-			} else {
+// 			return nil
+// 		})
 
-				res.Result = "no such bucket available | n"
+// 	}
 
-			}
+// 	c.JSON(200, res)
 
-			return nil
-		})
+// }
 
-	}
+// func (b *boltBrowerWeb) Buckets(c *iris.Context) {
+// 	res := []string{}
 
-	c.JSON(200, res)
+// 	db.View(func(tx *bolt.Tx) error {
 
-}
+// 		return tx.ForEach(func(name []byte, _ *bolt.Bucket) error {
 
-func (b *boltBrowerWeb) Buckets(c *iris.Context) {
-	logConect(c)
+// 			b := []string{string(name)}
+// 			res = append(res, b...)
+// 			return nil
+// 		})
 
-	res := []string{}
+// 	})
 
-	db.View(func(tx *bolt.Tx) error {
+// 	c.JSON(200, res)
 
-		return tx.ForEach(func(name []byte, _ *bolt.Bucket) error {
-
-			b := []string{string(name)}
-			res = append(res, b...)
-			return nil
-		})
-
-	})
-
-	c.JSON(200, res)
-
-}
+// }
