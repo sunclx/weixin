@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	go dbedit()
+	//go dbedit()
 
 	s := New()
 
