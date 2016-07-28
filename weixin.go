@@ -30,7 +30,8 @@ func main() {
 	//启动服务
 	s := New()
 	s.UseFunc(logHandler)
-	s.UseFunc(testHandler)
+	//s.UseFunc(testHandler)
+	s.UseFunc(messageHandler)
 	s.Run(":80")
 }
 

@@ -26,6 +26,8 @@ func testHandler(c *Context) {
 func messageHandler(c *Context) {
 	if c.Message.MsgType != MsgTypeText {
 		c.WriteString(ResponseText(c.Message.FromUserName, cfg.DeveloperID, "暂不支持此类型信息"))
+		return
 	}
 
+	c.WriteString(ResponseText(c.Message.FromUserName, cfg.DeveloperID, handlePhone(c.Message)))
 }
