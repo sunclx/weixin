@@ -13,8 +13,9 @@ func main() {
 	//go dbedit()
 
 	s := New()
+	s.UseFunc(logHandler)
 
-	s.UseFunc(mainHandle)
+	s.UseFunc(mainHandler)
 	//server := iris.New()
 
 	//监听github.com的自动更新
@@ -29,47 +30,23 @@ func main() {
 	s.Run(":80")
 }
 
-func mainHandle(c *Context) {
-	//logConect(c)
+func logHandler(c *Context) {
+	r := c.Request
+	fmt.Println(r.RemoteAddr, r.Method, r.Host, r.URL.Path, r.URL.RawQuery)
+}
 
-	// //排除非POST请求
-	// if c.MethodString() != iris.MethodPost {
-	// 	c.WriteString("404")
-	// 	return
-	// }
-
-	// //建议域名是否真确
-	// if hostname := c.HostString(); hostname != "weixin.chenlixin.net" {
-	// 	c.Log("异常域名:", hostname)
-	// 	c.Write("404")
-	// 	return
-	// }
-
-	// //检验是否是微信服务器的请求
-	// signature := c.URLParam("signature")
-	// timestamp := c.URLParam("timestamp")
-	// nonce := c.URLParam("nonce")
-	// if !validateURL(signature, timestamp, nonce) {
-	// 	c.Log("参数错误%s,%s,%s.\n", signature, timestamp, nonce)
-	// 	c.Write("404")
-	// 	return
-	// }
-
-	//处理请求数据
-	//handlerMux(c)
+func mainHandler(c *Context) {
 	fmt.Println("输入数据是：")
 	//fmt.Println(c)
 	io.Copy(os.Stdout, c.Request.Body)
 
-	template := `<xml>
+	s := fmt.Sprintf(`<xml>
 <ToUserName><![CDATA[%s]]></ToUserName>
 <FromUserName><![CDATA[%s]]></FromUserName>
 <CreateTime>%d</CreateTime>
 <MsgType><![CDATA[text]]></MsgType>
 <Content><![CDATA[%s]]></Content>
-</xml>`
-
-	s := fmt.Sprintf(template, c.OpenID, "gh_3fb3b0b8f2fa", time.Now().Unix(), "success")
+</xml>`, c.OpenID, "gh_3fb3b0b8f2fa", time.Now().Unix(), "success")
 	fmt.Println("输出数据是：")
 	fmt.Println(s)
 
@@ -77,20 +54,6 @@ func mainHandle(c *Context) {
 }
 
 var verbose = false
-
-// func updateHandle(c *iris.Context) {
-// 	logConect(c)
-
-// 	//执行命令
-// 	cmd := exec.Command("git", "pull")
-// 	cmd.Dir = "/root/go/src/github.com/sunclx/weixin"
-// 	err := cmd.Run()
-// 	if err != nil {
-// 		fmt.Println("errors:", err)
-
-// 	}
-// 	c.WriteString("success")
-// }
 
 func logConect(c *iris.Context) {
 	if !verbose {
