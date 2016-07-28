@@ -33,7 +33,7 @@ func logHandler(c *Context) {
 
 func mainHandler(c *Context) {
 
-	testID := "success-log"
+	testID := "success-db"
 
 	c.WriteString(fmt.Sprintf(`<xml>
 <ToUserName><![CDATA[%s]]></ToUserName>
