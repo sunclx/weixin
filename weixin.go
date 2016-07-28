@@ -46,7 +46,7 @@ func mainHandler(c *Context) {
 <CreateTime>%d</CreateTime>
 <MsgType><![CDATA[text]]></MsgType>
 <Content><![CDATA[%s]]></Content>
-</xml>`, c.OpenID, "gh_3fb3b0b8f2fa", time.Now().Unix(), "success")
+</xml>`, c.OpenID, "gh_3fb3b0b8f2fa", time.Now().Unix(), "success-log")
 	fmt.Println("输出数据是：")
 	fmt.Println(s)
 
