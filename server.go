@@ -43,6 +43,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Context
 	ctx := &Context{
+		ResponseWriter: w,
+		Request:        r,
+
 		Signature: signature,
 		Timestamp: timestamp,
 		Nonce:     nonce,
@@ -66,10 +69,10 @@ func New() *ServerMux {
 	}
 }
 func (s *ServerMux) ServeMessage(ctx *Context) {
-	s.handlers[0].ServeMessage(ctx)
-	// ctx.handlers = s.handlers
-	// ctx.Start()
-	// ctx.Next()
+	//s.handlers[0].ServeMessage(ctx)
+	ctx.handlers = s.handlers
+	ctx.Start()
+	ctx.Next()
 }
 func (s *ServerMux) Run(addr string) error {
 	server := NewServer()
