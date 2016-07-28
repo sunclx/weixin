@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"time"
 
 	"github.com/kataras/iris"
@@ -27,6 +26,7 @@ func main() {
 
 	//启动服务
 	//server.Listen(":80")
+	s.Run(":80")
 }
 
 func mainHandle(c *Context) {
@@ -77,19 +77,19 @@ func mainHandle(c *Context) {
 
 var verbose = false
 
-func updateHandle(c *iris.Context) {
-	logConect(c)
+// func updateHandle(c *iris.Context) {
+// 	logConect(c)
 
-	//执行命令
-	cmd := exec.Command("git", "pull")
-	cmd.Dir = "/root/go/src/github.com/sunclx/weixin"
-	err := cmd.Run()
-	if err != nil {
-		fmt.Println("errors:", err)
+// 	//执行命令
+// 	cmd := exec.Command("git", "pull")
+// 	cmd.Dir = "/root/go/src/github.com/sunclx/weixin"
+// 	err := cmd.Run()
+// 	if err != nil {
+// 		fmt.Println("errors:", err)
 
-	}
-	c.WriteString("success")
-}
+// 	}
+// 	c.WriteString("success")
+// }
 
 func logConect(c *iris.Context) {
 	if !verbose {
