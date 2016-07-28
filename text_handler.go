@@ -7,6 +7,10 @@ import (
 	"github.com/boltdb/bolt"
 )
 
+type MessageHandler interface {
+	ServeMessage(msg *Text)
+}
+
 const (
 	PrefixPhone         string = "手机 "
 	PrefixBindPhone     string = "我的手机 "
@@ -14,9 +18,12 @@ const (
 	PrefixStudentID     string = "学号 "
 )
 
-func handlePhone(t Text) string {
-	content := t.Content
-	name := content[len(PrefixPhone):]
+func handlePhone(t *Text) string {
+	if !strings.HasPrefix(t.Content, PrefixPhone) {
+		return "wrong"
+	}
+
+	name := t.Content[len(PrefixPhone):]
 
 	var n Contact
 	err := n.Get(name)
@@ -27,7 +34,7 @@ func handlePhone(t Text) string {
 	return fmt.Sprintf("%s %s", name, n.PhoneNumber)
 }
 
-func handleBindPhone(t Text) string {
+func handleBindPhone(t *Text) string {
 	content := t.Content
 	result := strings.Fields(content)
 	name, phone := result[1], result[2]

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/xml"
 	"fmt"
 	"net/http"
 )
@@ -44,6 +46,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	buffer := bytes.NewBuffer(nil)
+	buffer.Reset()
+	buffer.ReadFrom(r.Body)
+
+	var t Text
+	xml.Unmarshal(buffer.Bytes(), &t)
+
 	// Context
 	ctx := &Context{
 		ResponseWriter: w,
@@ -54,6 +63,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Nonce:     nonce,
 		OpenID:    openid,
 
+		Message: &t,
+
+		index:    -1,
 		handlers: s.handlers,
 	}
 	ctx.Next()

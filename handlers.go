@@ -24,6 +24,8 @@ func testHandler(c *Context) {
 }
 
 func messageHandler(c *Context) {
-	r := c.Request
-	fmt.Println(r.RemoteAddr, r.Method, r.Host, r.URL.Path, r.URL.RawQuery)
+	if c.Message.MsgType != MsgTypeText {
+		c.WriteString(ResponseText(c.Message.FromUserName, cfg.DeveloperID, "暂不支持此类型信息"))
+	}
+
 }

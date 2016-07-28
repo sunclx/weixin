@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/xml"
 	"fmt"
 	"time"
 )
@@ -17,49 +16,40 @@ const (
 	MsgTypeNews  MsgType = "news"  // 图文消息
 )
 
-const developerID string = "gh_3fb3b0b8f2fa"
-
-type msgType struct {
-	MsgType MsgType `xml:"MsgType"`
-}
-
+// Text todo
 type Text struct {
-	ToUserName   string `xml:"ToUserName"`
-	FromUserName string `xml:"FromUserName"`
-	CreateTime   int64  `xml:"CreateTime"`
-	MsgType      string `xml:"MsgType"`
-	Content      string `xml:"Content"`
-	MsgID        int64  `xml:"MsgId"`
+	ToUserName   string  `xml:"ToUserName"`
+	FromUserName string  `xml:"FromUserName"`
+	CreateTime   int64   `xml:"CreateTime"`
+	MsgType      MsgType `xml:"MsgType"`
+	Content      string  `xml:"Content"`
+	MsgID        string  `xml:"MsgId"`
 }
 
-func ParseText(data []byte) Text {
-	var t Text
-	xml.Unmarshal(data, &t)
-	return t
-
-}
-func RText(openid, content string) Text {
-	return Text{
-		ToUserName:   openid,
-		FromUserName: developerID,
-		MsgType:      "text",
-		Content:      content,
-	}
-
-}
-func (t Text) Marshal() []byte {
-	data, _ := xml.Marshal(t)
-	return data
-}
 func (t Text) String() string {
-	var templateText = `
+	return fmt.Sprintf(`
 <xml>
 <ToUserName><![CDATA[%s]]></ToUserName>
 <FromUserName><![CDATA[%s]]></FromUserName>
 <CreateTime>%d</CreateTime>
 <MsgType><![CDATA[text]]></MsgType>
 <Content><![CDATA[%s]]></Content>
-</xml>`
-	return fmt.Sprintf(templateText, t.ToUserName, t.FromUserName, time.Now().Unix(), t.Content)
+<MsgId><![CDATA[%s]]></MsgId>
+</xml>`,
+		t.ToUserName, t.FromUserName, time.Now().Unix(), t.Content, t.MsgID)
+
+}
+
+// ResponseText todo
+func ResponseText(toUserName, fromUserName, content string) string {
+	return fmt.Sprintf(`
+<xml>
+<ToUserName><![CDATA[%s]]></ToUserName>
+<FromUserName><![CDATA[%s]]></FromUserName>
+<CreateTime>%d</CreateTime>
+<MsgType><![CDATA[text]]></MsgType>
+<Content><![CDATA[%s]]></Content>
+</xml>`,
+		toUserName, fromUserName, time.Now().Unix(), content)
 
 }

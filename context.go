@@ -4,7 +4,7 @@ import "net/http"
 
 //Handler todo
 type Handler interface {
-	ServeMessage(ctx *Context)
+	ServeContext(ctx *Context)
 }
 
 //HandlerFunc ...
@@ -12,8 +12,8 @@ type HandlerFunc func(*Context)
 
 // var _ Handler = HandlerFunc(nil)
 
-// ServeMessage todo
-func (fn HandlerFunc) ServeMessage(ctx *Context) { fn(ctx) }
+// ServeContext todo
+func (fn HandlerFunc) ServeContext(ctx *Context) { fn(ctx) }
 
 //Context ...
 type Context struct {
@@ -30,7 +30,7 @@ type Context struct {
 
 	//MsgCiphertext []byte // 消息的密文文本
 	//MsgPlaintext  []byte    // 消息的明文文本, xml格式
-	//MixedMsg *MixedMsg // 消息
+	Message *Text
 
 	//Token string // 当前消息所属公众号的 Token
 	//AESKey      []byte // 当前消息加密所用的 aes-key, read-only!!!
@@ -45,13 +45,13 @@ type Context struct {
 
 // Start todo
 // func (ctx *Context) Start() {
-// 	ctx.handlers[ctx.index].ServeMessage(ctx)
+// 	ctx.handlers[ctx.index].ServeContext(ctx)
 // }
 
 // Next todo
 func (ctx *Context) Next() {
-	for ; ctx.index < len(ctx.handlers); ctx.index++ {
-		ctx.handlers[ctx.index].ServeMessage(ctx)
+	for ctx.index++; ctx.index < len(ctx.handlers); ctx.index++ {
+		ctx.handlers[ctx.index].ServeContext(ctx)
 	}
 	ctx.index--
 }
