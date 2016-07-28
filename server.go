@@ -13,11 +13,11 @@ type Server struct {
 	token     string
 	secruteID string
 
-	handler Handler
+	handlers []Handler
 	//	errorHandler ErrorHandler
 }
 
-func NewServer() *Server {
+func New() *Server {
 	return &Server{token: "njmu0917"}
 
 }
@@ -50,47 +50,23 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Timestamp: timestamp,
 		Nonce:     nonce,
 		OpenID:    openid,
+
+		handlers: make([]Handler, 0, 8),
 	}
-	s.handler.ServeMessage(ctx)
+	ctx.handlers = s.handlers
+	ctx.Next()
 }
 
 func (s *Server) Run(addr string) error {
 	return http.ListenAndServe(addr, s)
 }
 
-type ServerMux struct {
-	defaultHandler Handler
-	handlers       []Handler
-}
-
-func New() *ServerMux {
-	return &ServerMux{
-		handlers: make([]Handler, 0, 8),
-	}
-}
-func (s *ServerMux) ServeMessage(ctx *Context) {
-	//s.handlers[0].ServeMessage(ctx)
-	ctx.handlers = s.handlers
-	//ctx.Start()
-	ctx.Next()
-}
-func (s *ServerMux) Run(addr string) error {
-	server := NewServer()
-	server.handler = s
-
-	return server.Run(addr)
-}
-func (s *ServerMux) Default(handler Handler) *ServerMux {
-	s.defaultHandler = handler
-	return s
-}
-
-func (s *ServerMux) Use(handlers ...Handler) *ServerMux {
+func (s *Server) Use(handlers ...Handler) *Server {
 	s.handlers = append(s.handlers, handlers...)
 	return s
 }
 
-func (s *ServerMux) UseFunc(handlersFunc ...func(ctx *Context)) *ServerMux {
+func (s *Server) UseFunc(handlersFunc ...func(ctx *Context)) *Server {
 
 	for _, handlerFunc := range handlersFunc {
 		s.handlers = append(s.handlers, HandlerFunc(handlerFunc))
@@ -99,6 +75,7 @@ func (s *ServerMux) UseFunc(handlersFunc ...func(ctx *Context)) *ServerMux {
 	return s
 }
 
+//验证函数
 func validateURL(signature, timestamp, nonce, token string) bool {
 	//排序参数并合并
 	ss := []string{token, timestamp, nonce}

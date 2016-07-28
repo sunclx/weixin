@@ -10,19 +10,8 @@ func main() {
 
 	s := New()
 	s.UseFunc(logHandler)
-
 	s.UseFunc(mainHandler)
-	//server := iris.New()
 
-	//监听github.com的自动更新
-	//server.Post("/update", updateHandle)
-	//server.Get("/update", updateHandle)
-
-	//监听微信服务器的信息
-	//server.HandleFunc("", "/", mainHandle)
-
-	//启动服务
-	//server.Listen(":80")
 	s.Run(":80")
 }
 
@@ -34,7 +23,6 @@ func logHandler(c *Context) {
 func mainHandler(c *Context) {
 
 	testID := "success-db"
-
 	c.WriteString(fmt.Sprintf(`<xml>
 <ToUserName><![CDATA[%s]]></ToUserName>
 <FromUserName><![CDATA[%s]]></FromUserName>
