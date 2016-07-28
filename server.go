@@ -71,7 +71,7 @@ func New() *ServerMux {
 func (s *ServerMux) ServeMessage(ctx *Context) {
 	//s.handlers[0].ServeMessage(ctx)
 	ctx.handlers = s.handlers
-	ctx.Start()
+	//ctx.Start()
 	ctx.Next()
 }
 func (s *ServerMux) Run(addr string) error {

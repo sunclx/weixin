@@ -58,7 +58,7 @@ func mainHandle(c *Context) {
 	//处理请求数据
 	//handlerMux(c)
 	fmt.Println("输入数据：")
-	fmt.Println(c)
+	//fmt.Println(c)
 	io.Copy(os.Stdout, c.Request.Body)
 
 	template := `<xml>
