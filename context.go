@@ -10,7 +10,7 @@ type Handler interface {
 //HandlerFunc ...
 type HandlerFunc func(*Context)
 
-var _ Handler = HandlerFunc(nil)
+// var _ Handler = HandlerFunc(nil)
 
 // ServeMessage todo
 func (fn HandlerFunc) ServeMessage(ctx *Context) { fn(ctx) }
@@ -44,9 +44,9 @@ type Context struct {
 }
 
 // Start todo
-func (ctx *Context) Start() {
-	ctx.handlers[ctx.index].ServeMessage(ctx)
-}
+// func (ctx *Context) Start() {
+// 	ctx.handlers[ctx.index].ServeMessage(ctx)
+// }
 
 // Next todo
 func (ctx *Context) Next() {

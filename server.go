@@ -1,11 +1,8 @@
 package main
 
 import (
-	"crypto/sha1"
 	"fmt"
 	"net/http"
-	"sort"
-	"strings"
 )
 
 type Server struct {
@@ -18,7 +15,13 @@ type Server struct {
 }
 
 func New() *Server {
-	return &Server{token: "njmu0917"}
+	return &Server{
+		appID:     cfg.AppID,
+		token:     cfg.Token,
+		secruteID: cfg.SecruteID,
+
+		handlers: make([]Handler, 0, 8),
+	}
 
 }
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -51,9 +54,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Nonce:     nonce,
 		OpenID:    openid,
 
-		handlers: make([]Handler, 0, 8),
+		handlers: s.handlers,
 	}
-	ctx.handlers = s.handlers
 	ctx.Next()
 }
 
@@ -73,23 +75,4 @@ func (s *Server) UseFunc(handlersFunc ...func(ctx *Context)) *Server {
 	}
 
 	return s
-}
-
-//验证函数
-func validateURL(signature, timestamp, nonce, token string) bool {
-	//排序参数并合并
-	ss := []string{token, timestamp, nonce}
-	sort.Strings(ss)
-	s := strings.Join(ss, "")
-
-	//计算sha1的值
-	h := sha1.New()
-	h.Write([]byte(s))
-	bs := h.Sum(nil)
-
-	//比较计算的signature与获取值比较
-	if signatureHex := fmt.Sprintf("%x", bs); signatureHex != signature {
-		return false
-	}
-	return true
 }

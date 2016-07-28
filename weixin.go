@@ -3,11 +3,15 @@ package main
 import "github.com/boltdb/bolt"
 
 var db *bolt.DB
+var cfg *config
 
 func main() {
+	// 初始化配置
+	initConfig()
+
 	//设置数据库
 	var err error
-	db, err = bolt.Open("/root/data.db", 0600, nil)
+	db, err = bolt.Open(cfg.DBPath, 0600, nil)
 	if err != nil {
 		return
 	}
@@ -28,4 +32,22 @@ func main() {
 	s.UseFunc(logHandler)
 	s.UseFunc(testHandler)
 	s.Run(":80")
+}
+
+type config struct {
+	DeveloperID string
+	AppID       string
+	Token       string
+	SecruteID   string
+	DBPath      string
+}
+
+func initConfig() {
+	cfg = &config{
+		DeveloperID: "gh_3fb3b0b8f2fa",
+		AppID:       "",
+		Token:       "njmu0917",
+		SecruteID:   "",
+		DBPath:      "/root/data.db",
+	}
 }

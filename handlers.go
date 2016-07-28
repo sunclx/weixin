@@ -22,3 +22,8 @@ func testHandler(c *Context) {
 </xml>`, c.OpenID, "gh_3fb3b0b8f2fa", time.Now().Unix(), testID))
 
 }
+
+func messageHandler(c *Context) {
+	r := c.Request
+	fmt.Println(r.RemoteAddr, r.Method, r.Host, r.URL.Path, r.URL.RawQuery)
+}
