@@ -69,7 +69,7 @@ func mainHandle(c *Context) {
 <Content><![CDATA[%s]]></Content>
 </xml>`
 
-	s := fmt.Sprintf(template, c.OpenID, "t.FromUserName", time.Now().Unix(), "success")
+	s := fmt.Sprintf(template, c.OpenID, "gh_3fb3b0b8f2fa", time.Now().Unix(), "success")
 	fmt.Println("输出数据：")
 	fmt.Println(s)
 
