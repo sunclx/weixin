@@ -88,12 +88,12 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // Printf todo
 func (c *Context) Printf(s string, a ...interface{}) {
-	fmt.Fprintf(c.ResponseWriter, s, a...)
+	c.ResponseText(fmt.Sprintf(s, a...))
 }
 
 // ResponseText todo
 func (c *Context) ResponseText(content string) {
-	c.Printf(`
+	fmt.Fprintf(c.ResponseWriter, `
 <xml>
 <ToUserName><![CDATA[%s]]></ToUserName>
 <FromUserName><![CDATA[%s]]></FromUserName>
