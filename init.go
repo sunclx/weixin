@@ -5,12 +5,6 @@ import "github.com/boltdb/bolt"
 var db *bolt.DB
 var cfg *config
 
-func init() {
-	//设置数据库
-	db, _ = bolt.Open(cfg.DBPath, 0600, nil)
-
-}
-
 type config struct {
 	DeveloperID string
 	AppID       string
@@ -20,7 +14,7 @@ type config struct {
 }
 
 func init() {
-	//设置数据库
+	//初始化配置
 	cfg = &config{
 		DeveloperID: "gh_3fb3b0b8f2fa",
 		AppID:       "",
@@ -28,4 +22,7 @@ func init() {
 		SecruteID:   "",
 		DBPath:      "/root/data.db",
 	}
+
+	//设置数据库
+	db, _ = bolt.Open(cfg.DBPath, 0600, nil)
 }
