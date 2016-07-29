@@ -29,9 +29,9 @@ func messageHandler(c *Context) {
 	msg.UseFunc(handleBindPhone)
 	msg.Begin()
 
-	// if msg.buffer.Len() <= 0 {
-	// 	defaultHandler(c)
-	// 	return
-	// }
+	if msg.buffer.Len() <= 0 {
+		defaultHandler(c)
+		return
+	}
 	c.ResponseText(msg.buffer.String())
 }

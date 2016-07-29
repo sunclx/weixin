@@ -6,21 +6,14 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-const (
-	PrefixPhone         string = "手机 "
-	PrefixBindPhone     string = "我的手机 "
-	PrefixBindStudentID string = "我的学号 "
-	PrefixStudentID     string = "学号 "
-)
-
 func handlePhone(msg *Message) {
 	t := msg.msg
-	if !strings.HasPrefix(t.Content, PrefixPhone) {
+	if !strings.HasPrefix(t.Content, "手机 ") {
 		msg.Next()
 		return
 	}
 
-	name := t.Content[len(PrefixPhone):]
+	name := t.Content[len("手机 "):]
 
 	var n Contact
 	err := n.Get(name)
@@ -33,7 +26,7 @@ func handlePhone(msg *Message) {
 
 func handleBindPhone(msg *Message) {
 	t := msg.msg
-	if !strings.HasPrefix(t.Content, PrefixBindPhone) {
+	if !strings.HasPrefix(t.Content, "我的手机 ") {
 		msg.Next()
 		return
 	}
