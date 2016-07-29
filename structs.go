@@ -1,23 +1,24 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/boltdb/bolt"
 )
 
+// NameID todo
 type NameID struct {
 	Name      string
 	StudentID string
 }
 
+// Encode todo
 func (n *NameID) Encode() []byte {
 	return []byte(fmt.Sprintf("%s&&%s", n.Name, n.StudentID))
 }
 
+// Decode todo
 func (n *NameID) Decode(data []byte) error {
 	if n == nil {
 		n = &NameID{}
@@ -26,6 +27,7 @@ func (n *NameID) Decode(data []byte) error {
 	return err
 }
 
+// Get todo
 func (n *NameID) Get(openid string) error {
 	return db.View(func(tx *bolt.Tx) error {
 		bx := tx.Bucket([]byte("NameID"))
@@ -38,6 +40,7 @@ func (n *NameID) Get(openid string) error {
 	})
 }
 
+// Put todo
 func (n *NameID) Put(openid string) error {
 	return db.Update(func(tx *bolt.Tx) error {
 		bx := tx.Bucket([]byte("NameID"))
@@ -45,14 +48,17 @@ func (n *NameID) Put(openid string) error {
 	})
 }
 
+// Contact todo
 type Contact struct {
 	PhoneNumber string
 }
 
+// Encode todo
 func (n *Contact) Encode() []byte {
 	return []byte(fmt.Sprintf("%s", n.PhoneNumber))
 }
 
+// Decode todo
 func (n *Contact) Decode(data []byte) error {
 	if n == nil {
 		n = &Contact{}
@@ -61,6 +67,7 @@ func (n *Contact) Decode(data []byte) error {
 	return err
 }
 
+//Get todo
 func (n *Contact) Get(openid string) error {
 	return db.View(func(tx *bolt.Tx) error {
 		bx := tx.Bucket([]byte("phone"))
@@ -73,62 +80,10 @@ func (n *Contact) Get(openid string) error {
 	})
 }
 
+// Put todo
 func (n *Contact) Put(openid string) error {
 	return db.Update(func(tx *bolt.Tx) error {
 		bx := tx.Bucket([]byte("phone"))
 		return bx.Put([]byte(openid), n.Encode())
 	})
-}
-
-type person struct {
-	StudentID  string
-	Name       string
-	Birthday   time.Time
-	BirthPlace string
-	Location   string
-}
-
-func personByByte(data []byte) *person {
-	var p person
-	err := json.Unmarshal(data, &p)
-	if err != nil {
-		return nil
-	}
-	return &p
-}
-
-func (p *person) JSON() string {
-	s, err := json.Marshal(p)
-	if err != nil {
-		return ""
-	}
-	return string(s)
-}
-func (p *person) Get() {
-	if p.StudentID == "" {
-		p = nil
-		return
-	}
-
-	err := db.View(func(tx *bolt.Tx) error {
-		bx := tx.Bucket([]byte("persons"))
-		bp := bx.Get([]byte(p.StudentID))
-		p = personByByte(bp)
-		return nil
-	})
-	if err != nil {
-		p = nil
-		return
-	}
-}
-func (p *person) Put() {
-	if p.StudentID == "" {
-		return
-	}
-
-	db.Update(func(tx *bolt.Tx) error {
-		bx := tx.Bucket([]byte("persons"))
-		return bx.Put([]byte(p.StudentID), []byte(p.JSON()))
-	})
-
 }
