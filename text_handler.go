@@ -33,14 +33,14 @@ func handlePhone(msg *Message) {
 
 func handleBindPhone(msg *Message) {
 	t := msg.msg
-	content := t.Content
-	result := strings.Fields(content)
-	name, phone := result[1], result[2]
-
-	if result[0] != PrefixBindPhone {
+	if !strings.HasPrefix(t.Content, PrefixPhone) {
 		msg.Next()
 		return
 	}
+
+	content := t.Content
+	result := strings.Fields(content)
+	name, phone := result[1], result[2]
 
 	db.Update(func(tx *bolt.Tx) error {
 		bx := tx.Bucket([]byte("phone"))
