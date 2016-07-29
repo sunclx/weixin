@@ -1,33 +1,47 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
+	"strings"
+
+	"github.com/boltdb/bolt"
 )
 
-func logHandler(c *Context) {
-	r := c.Request
-	fmt.Println(r.RemoteAddr, r.Method, r.Host, r.URL.Path, r.URL.RawQuery)
+func handlePhone(msg *Message) {
+	t := msg.msg
+	if !strings.HasPrefix(t.Content, "手机 ") {
+		msg.Next()
+		return
+	}
+
+	name := t.Content[len("手机 "):]
+
+	var n Contact
+	err := n.Get(name)
+	if err != nil {
+		msg.Printf("没有%s的号码", name)
+	}
+
+	msg.Printf("%s %s", name, n.PhoneNumber)
 }
 
-func messageHandler(c *Context) {
-	if c.Message.MsgType != MsgTypeText {
-		c.ResponseText("暂不支持此类型信息")
+func handleBindPhone(msg *Message) {
+	t := msg.msg
+	if !strings.HasPrefix(t.Content, "我的手机 ") {
+		msg.Next()
 		return
 	}
 
-	msg := &Message{
-		msg:             c.Message,
-		buffer:          bytes.NewBuffer(nil),
-		messageHandlers: make([]MessageHandler, 0, 8),
-	}
-	msg.UseFunc(handlePhone)
-	msg.UseFunc(handleBindPhone)
-	msg.Begin()
+	content := t.Content
+	result := strings.Fields(content)
+	name, phone := result[1], result[2]
 
-	if msg.buffer.Len() <= 0 {
-		c.ResponseText("你的信息格式错误")
-		return
-	}
-	c.ResponseText(msg.buffer.String())
+	db.Update(func(tx *bolt.Tx) error {
+		bx := tx.Bucket([]byte("phone"))
+		err := bx.Put([]byte(name), []byte(phone))
+
+		return err
+	})
+
+	msg.Printf("设置成功")
+
 }
