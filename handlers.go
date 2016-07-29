@@ -25,7 +25,6 @@ func messageHandler(c *Context) {
 		buffer:          bytes.NewBuffer(nil),
 		messageHandlers: make([]MessageHandler, 0, 8),
 	}
-
 	msg.UseFunc(handlePhone)
 	msg.UseFunc(handleBindPhone)
 	msg.Begin()

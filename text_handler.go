@@ -17,6 +17,7 @@ func handlePhone(msg *Message) {
 	t := msg.msg
 	if !strings.HasPrefix(t.Content, PrefixPhone) {
 		msg.Next()
+		return
 	}
 
 	name := t.Content[len(PrefixPhone):]
@@ -38,6 +39,7 @@ func handleBindPhone(msg *Message) {
 
 	if result[0] != PrefixBindPhone {
 		msg.Next()
+		return
 	}
 
 	db.Update(func(tx *bolt.Tx) error {
