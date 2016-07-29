@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -12,11 +13,9 @@ import (
 type Context struct {
 	//
 	ResponseWriter http.ResponseWriter
-	Request        *http.Request
-
 	//
 	OpenID  string
-	Type    MsgType
+	Type    string
 	Message *Text
 	//
 	index    int
@@ -34,8 +33,8 @@ func New() *Context {
 }
 
 func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
 
-	//	c.Reset()
 	// 检查域名及请求方法
 	if hostname := r.Host; r.Method != "POST" || hostname != "weixin.chenlixin.net" || r.URL.Path != "/" {
 		fmt.Println(r.RemoteAddr, r.Method, r.Host, r.URL.Path, r.URL.RawQuery)
@@ -56,29 +55,33 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	buffer := bytes.NewBuffer(nil)
-	buffer.ReadFrom(r.Body)
+	// 读取数据并Decode
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		c.ResponseText("数据错误")
+		return
+	}
+	xml.Unmarshal(data, c.Message)
 
-	var t Text
-	xml.Unmarshal(buffer.Bytes(), &t)
-
+	// 设置Context的值
 	c.ResponseWriter = w
-	c.Request = r
 	c.OpenID = openid
-	c.Type = t.MsgType
-	c.Message = &t
+	c.Type = c.Message.MsgType
+	c.index = 0
+	c.buffer.Reset()
 
-	if c.Message.MsgType != MsgTypeText || c.handlers == nil || len(c.handlers) == 0 {
+	// 检查并执行Handlers
+	if c.Type != "text" || c.handlers == nil || len(c.handlers) == 0 {
 		c.ResponseText("暂不支持此类型信息")
 		return
 	}
-
 	c.handlers[0].ServeMessage(c)
+
+	// 返回数据
 	if c.buffer.Len() <= 0 {
 		c.ResponseText("信息格式错误")
 		return
 	}
-
 	c.ResponseText(c.buffer.String())
 }
 
@@ -128,15 +131,4 @@ func (c *Context) Next() {
 		return
 	}
 	c.handlers[c.index].ServeMessage(c)
-}
-
-//Reset todo
-func (c *Context) Reset(h ...Handler) {
-	c.ResponseWriter = nil
-	c.Request = nil
-	c.OpenID = ""
-	c.Type = ""
-	c.Message = nil
-	c.index = 0
-	c.buffer.Reset()
 }
