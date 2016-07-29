@@ -29,7 +29,7 @@ func messageHandler(c *Context) {
 	msg.UseFunc(handleBindPhone)
 	msg.Begin()
 
-	if msg.buffer.Len() < 0 {
+	if msg.buffer.Len() <= 0 {
 		defaultHandler(c)
 		return
 	}

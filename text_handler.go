@@ -33,7 +33,7 @@ func handlePhone(msg *Message) {
 
 func handleBindPhone(msg *Message) {
 	t := msg.msg
-	if !strings.HasPrefix(t.Content, PrefixPhone) {
+	if !strings.HasPrefix(t.Content, PrefixBindPhone) {
 		msg.Next()
 		return
 	}
