@@ -67,10 +67,6 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	xml.Unmarshal(data, c.Message)
-	c.Type = c.Message.MsgType
-	c.index = 0
-	c.buffer.Reset()
-
 	c.Log("测试数据\n")
 	if true {
 		c.Log("返回数据\n")
@@ -78,6 +74,9 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		c.Log("数据返回成功\n")
 		return
 	}
+	c.Type = c.Message.MsgType
+	c.index = 0
+	c.buffer.Reset()
 
 	// 检查并执行Handlers
 	if c.Type != "text" || c.handlers == nil || len(c.handlers) == 0 {
