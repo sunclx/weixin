@@ -54,6 +54,7 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("404"))
 		return
 	}
+
 	if true {
 		c.ResponseText("succcess")
 		return
