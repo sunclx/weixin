@@ -54,6 +54,10 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("404"))
 		return
 	}
+	if true {
+		c.ResponseText("succcess")
+		return
+	}
 
 	// 读取数据并Decode
 	data, err := ioutil.ReadAll(r.Body)
