@@ -2,36 +2,42 @@ package main
 
 import (
 	"bytes"
-	"crypto/sha1"
 	"encoding/xml"
 	"fmt"
 	"net/http"
-	"sort"
-	"strings"
 	"time"
 )
 
 //Context todo
 type Context struct {
+	//
 	ResponseWriter http.ResponseWriter
 	Request        *http.Request
-
+	//
 	appID     string
 	token     string
 	secruteID string
-
-	OpenID string
-	Type   MsgType
-
+	//
+	OpenID  string
+	Type    MsgType
 	Message *Text
+	//
+	index    int
+	handlers []Handler
+	//
+	buffer *bytes.Buffer
 }
 
 // New todo
 func New() *Context {
 	return &Context{
+		//
 		appID:     cfg.AppID,
 		token:     cfg.Token,
 		secruteID: cfg.SecruteID,
+		//
+		handlers: make([]Handler, 0, 8),
+		buffer:   bytes.NewBuffer(nil),
 	}
 }
 
@@ -76,35 +82,26 @@ func (s *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Message: &t,
 	}
 
+	if ctx.handlers == nil || len(ctx.handlers) == 0 {
+		return
+	}
+	ctx.handlers[0].ServeMessage(ctx)
+
 	if ctx.Message.MsgType != MsgTypeText {
 		ctx.ResponseText("暂不支持此类型信息")
 		return
 	}
 
-	msg := &Message{
-		msg:             ctx.Message,
-		buffer:          bytes.NewBuffer(nil),
-		messageHandlers: make([]MessageHandler, 0, 8),
-	}
-	msg.UseFunc(handlePhone)
-	msg.UseFunc(handleBindPhone)
-	msg.Begin()
-
-	if msg.buffer.Len() <= 0 {
+	if ctx.buffer.Len() <= 0 {
 		ctx.ResponseText("你的信息格式错误")
 		return
 	}
-	ctx.ResponseText(msg.buffer.String())
+	ctx.ResponseText(ctx.buffer.String())
 
 }
 
-func (c *Context) Run() {
-	http.ListenAndServe(":80", c)
-}
-
-// Printf todo
 func (c *Context) Printf(s string, a ...interface{}) {
-	fmt.Fprintf(c.ResponseWriter, s, a...)
+	fmt.Fprintf(c.buffer, s, a...)
 }
 
 // ResponseText todo
@@ -121,21 +118,27 @@ func (c *Context) ResponseText(content string) {
 
 }
 
-//验证函数
-func validateURL(signature, timestamp, nonce, token string) bool {
-	//排序参数并合并
-	ss := []string{token, timestamp, nonce}
-	sort.Strings(ss)
-	s := strings.Join(ss, "")
+func (c *Context) Use(h ...Handler) {
+	c.handlers = append(c.handlers, h...)
+}
 
-	//计算sha1的值
-	h := sha1.New()
-	h.Write([]byte(s))
-	bs := h.Sum(nil)
-
-	//比较计算的signature与获取值比较
-	if signatureHex := fmt.Sprintf("%x", bs); signatureHex != signature {
-		return false
+func (c *Context) UseFunc(fns ...func(h *Context)) {
+	for _, fn := range fns {
+		c.handlers = append(c.handlers, HandlerFunc(fn))
 	}
-	return true
+
+}
+
+func (c *Context) Run() {
+
+	http.ListenAndServe(":80", c)
+}
+
+func (c *Context) Next() {
+	c.index++
+	if c.index >= len(c.handlers) {
+		c.index--
+		return
+	}
+	c.handlers[c.index].ServeMessage(c)
 }

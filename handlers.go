@@ -6,32 +6,31 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-func handlePhone(msg *Message) {
-	t := msg.msg
-	if !strings.HasPrefix(t.Content, "手机 ") {
-		msg.Next()
+func handlePhone(c *Context) {
+	content := c.Message.Content
+	if !strings.HasPrefix(content, "手机 ") {
+		c.Next()
 		return
 	}
 
-	name := t.Content[len("手机 "):]
+	name := content[len("手机 "):]
 
 	var n Contact
 	err := n.Get(name)
 	if err != nil {
-		msg.Printf("没有%s的号码", name)
+		c.Printf("没有%s的号码", name)
 	}
 
-	msg.Printf("%s %s", name, n.PhoneNumber)
+	c.Printf("%s %s", name, n.PhoneNumber)
 }
 
-func handleBindPhone(msg *Message) {
-	t := msg.msg
-	if !strings.HasPrefix(t.Content, "我的手机 ") {
-		msg.Next()
+func handleBindPhone(c *Context) {
+	content := c.Message.Content
+	if !strings.HasPrefix(content, "我的手机 ") {
+		c.Next()
 		return
 	}
 
-	content := t.Content
 	result := strings.Fields(content)
 	name, phone := result[1], result[2]
 
@@ -42,6 +41,6 @@ func handleBindPhone(msg *Message) {
 		return err
 	})
 
-	msg.Printf("设置成功")
+	c.Printf("设置成功")
 
 }
