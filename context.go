@@ -35,7 +35,7 @@ func New() *Context {
 
 func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	//	c.Reset()
+	c.Reset()
 	// 检查域名及请求方法
 	if hostname := r.Host; r.Method != "POST" || hostname != "weixin.chenlixin.net" || r.URL.Path != "/" {
 		fmt.Println(r.RemoteAddr, r.Method, r.Host, r.URL.Path, r.URL.RawQuery)
@@ -68,15 +68,11 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c.Type = t.MsgType
 	c.Message = &t
 
-	if c.Message.MsgType != MsgTypeText {
+	if c.Message.MsgType != MsgTypeText || c.handlers == nil || len(c.handlers) == 0 {
 		c.ResponseText("暂不支持此类型信息")
 		return
 	}
 
-	if c.handlers == nil || len(c.handlers) == 0 {
-		c.ResponseText("暂不支持此类型信息")
-		return
-	}
 	c.handlers[0].ServeMessage(c)
 
 	if c.buffer.Len() <= 0 {
@@ -89,12 +85,12 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // Printf todo
 func (c *Context) Printf(s string, a ...interface{}) {
-	c.ResponseText(fmt.Sprintf(s, a...))
+	fmt.Fprintf(c.buffer, s, a...)
 }
 
 // ResponseText todo
 func (c *Context) ResponseText(content string) {
-	fmt.Fprintf(c.buffer, `
+	fmt.Fprintf(c.ResponseWriter, `
 <xml>
 <ToUserName><![CDATA[%s]]></ToUserName>
 <FromUserName><![CDATA[%s]]></FromUserName>
