@@ -3,6 +3,8 @@ package main
 import (
 	"crypto/sha1"
 	"fmt"
+	"io"
+	"os"
 	"sort"
 	"strings"
 
@@ -11,6 +13,7 @@ import (
 
 var db *bolt.DB
 var cfg *config
+var f io.Writer
 
 type config struct {
 	DeveloperID string
@@ -32,6 +35,9 @@ func init() {
 
 	//设置数据库
 	db, _ = bolt.Open(cfg.DBPath, 0600, nil)
+
+	f, _ = os.Create("/root/log.log")
+
 }
 
 //验证函数

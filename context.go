@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -42,7 +41,7 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("404"))
 		return
 	}
-
+	c.Log("建议参数")
 	// 检验请求参数
 	r.ParseForm()
 	queryParams := r.Form
@@ -55,7 +54,7 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("404"))
 		return
 	}
-
+	c.Log("测试数据")
 	if true {
 		c.ResponseText("succcess")
 		return
@@ -141,10 +140,6 @@ func (c *Context) Next() {
 
 // Log todo
 func (c *Context) Log(s string) {
-	f, err := os.Create("/root/log.log")
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
+
 	f.Write([]byte(s))
 }
