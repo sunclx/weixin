@@ -35,7 +35,7 @@ func New() *Context {
 
 func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	//c.Reset()
+	c.Reset()
 	// 检查域名及请求方法
 	if hostname := r.Host; r.Method != "POST" || hostname != "weixin.chenlixin.net" || r.URL.Path != "/" {
 		fmt.Println(r.RemoteAddr, r.Method, r.Host, r.URL.Path, r.URL.RawQuery)
@@ -74,7 +74,6 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c.handlers[0].ServeMessage(c)
-
 	if c.buffer.Len() <= 0 {
 		c.ResponseText("信息格式错误")
 		return
