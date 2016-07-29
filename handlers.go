@@ -10,16 +10,13 @@ func logHandler(c *Context) {
 	fmt.Println(r.RemoteAddr, r.Method, r.Host, r.URL.Path, r.URL.RawQuery)
 }
 
-func testHandler(c *Context) {
-
-	testID := "success-serveMux"
-	c.ResponseText(testID)
-
+func defaultHandler(c *Context) {
+	c.ResponseText("暂不支持此类型信息")
 }
 
 func messageHandler(c *Context) {
 	if c.Message.MsgType != MsgTypeText {
-		c.ResponseText("暂不支持此类型信息")
+		defaultHandler(c)
 		return
 	}
 
@@ -33,7 +30,7 @@ func messageHandler(c *Context) {
 	msg.UseFunc(handleBindPhone)
 
 	if msg.buffer.Len() < 0 {
-		c.Printf("success")
+		defaultHandler(c)
 		return
 	}
 	c.ResponseText(msg.buffer.String())

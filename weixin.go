@@ -50,6 +50,5 @@ func main() {
 	s.UseFunc(logHandler)
 	s.UseFunc(messageHandler)
 
-	//s.UseFunc(testHandler)
 	s.Listen(":80")
 }
