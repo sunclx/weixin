@@ -79,6 +79,12 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	c.handlers[0].ServeMessage(c)
 
+	if c.buffer.Len() <= 0 {
+		c.ResponseText("信息格式错误")
+		return
+	}
+
+	c.buffer.WriteTo(c.ResponseWriter)
 }
 
 // Printf todo
@@ -88,7 +94,7 @@ func (c *Context) Printf(s string, a ...interface{}) {
 
 // ResponseText todo
 func (c *Context) ResponseText(content string) {
-	fmt.Fprintf(c.ResponseWriter, `
+	fmt.Fprintf(c.buffer, `
 <xml>
 <ToUserName><![CDATA[%s]]></ToUserName>
 <FromUserName><![CDATA[%s]]></FromUserName>
