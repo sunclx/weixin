@@ -141,7 +141,7 @@ func (c *Context) Next() {
 
 // Log todo
 func (c *Context) Log(s string) {
-	f, err := os.Create("log.log")
+	f, err := os.Create("/root/log.log")
 	if err != nil {
 		panic(err)
 	}
