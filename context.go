@@ -34,6 +34,7 @@ func New() *Context {
 }
 
 func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
 	c.Reset()
 	// 检查域名及请求方法
 	if hostname := r.Host; r.Method != "POST" || hostname != "weixin.chenlixin.net" || r.URL.Path != "/" {
@@ -66,28 +67,28 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c.OpenID = openid
 	c.Type = t.MsgType
 	c.Message = &t
+	c.ResponseText("你的信息格式错误")
+	// if c.handlers == nil || len(c.handlers) == 0 {
+	// 	return
+	// }
+	// c.handlers[0].ServeMessage(c)
 
-	if c.handlers == nil || len(c.handlers) == 0 {
-		return
-	}
-	c.handlers[0].ServeMessage(c)
+	// if c.Message.MsgType != MsgTypeText {
+	// 	c.ResponseText("暂不支持此类型信息")
+	// 	return
+	// }
 
-	if c.Message.MsgType != MsgTypeText {
-		c.ResponseText("暂不支持此类型信息")
-		return
-	}
-
-	if c.buffer.Len() <= 0 {
-		c.ResponseText("你的信息格式错误")
-		return
-	}
-	c.ResponseText(c.buffer.String())
+	// if c.buffer.Len() <= 0 {
+	// 	c.ResponseText("你的信息格式错误")
+	// 	return
+	// }
+	// c.ResponseText(c.buffer.String())
 
 }
 
 // Printf todo
 func (c *Context) Printf(s string, a ...interface{}) {
-	fmt.Fprintf(c.buffer, s, a...)
+	fmt.Fprintf(c.ResponseWriter, s, a...)
 }
 
 // ResponseText todo
