@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 //Context todo
@@ -98,15 +99,17 @@ func (c *Context) Printf(s string, a ...interface{}) {
 
 // ResponseText todo
 func (c *Context) ResponseText(content string) {
-	// 	fmt.Fprintf(c.ResponseWriter, `
-	// <xml>
-	// <ToUserName><![CDATA[%s]]></ToUserName>
-	// <FromUserName><![CDATA[%s]]></FromUserName>
-	// <CreateTime>%d</CreateTime>
-	// <MsgType><![CDATA[text]]></MsgType>
-	// <Content><![CDATA[%s]]></Content>
-	// </xml>`,
-	// 		c.OpenID, cfg.DeveloperID, time.Now().Unix(), content)
+	c.Log("start\n")
+	fmt.Fprintf(c.ResponseWriter, `
+	<xml>
+	<ToUserName><![CDATA[%s]]></ToUserName>
+	<FromUserName><![CDATA[%s]]></FromUserName>
+	<CreateTime>%d</CreateTime>
+	<MsgType><![CDATA[text]]></MsgType>
+	<Content><![CDATA[%s]]></Content>
+	</xml>`,
+		c.OpenID, cfg.DeveloperID, time.Now().Unix(), content)
+	c.Log("end\n")
 
 }
 
