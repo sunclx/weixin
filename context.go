@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -136,4 +137,14 @@ func (c *Context) Next() {
 		return
 	}
 	c.handlers[c.index].ServeMessage(c)
+}
+
+// Log todo
+func (c *Context) Log(s string) {
+	f, err := os.Create("log.log")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	f.Write([]byte(s))
 }
