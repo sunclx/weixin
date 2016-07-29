@@ -56,6 +56,10 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 设置Context的值
+	c.ResponseWriter = w
+	c.Request = r
+	c.OpenID = openid
 	// 读取数据并Decode
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -63,11 +67,6 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	xml.Unmarshal(data, c.Message)
-
-	// 设置Context的值
-	c.ResponseWriter = w
-	c.Request = r
-	c.OpenID = openid
 	c.Type = c.Message.MsgType
 	c.index = 0
 	c.buffer.Reset()
