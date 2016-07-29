@@ -13,10 +13,7 @@ type Context struct {
 	//
 	ResponseWriter http.ResponseWriter
 	Request        *http.Request
-	//
-	appID     string
-	token     string
-	secruteID string
+
 	//
 	OpenID  string
 	Type    MsgType
@@ -31,17 +28,13 @@ type Context struct {
 // New todo
 func New() *Context {
 	return &Context{
-		//
-		appID:     cfg.AppID,
-		token:     cfg.Token,
-		secruteID: cfg.SecruteID,
-		//
 		handlers: make([]Handler, 0, 8),
 		buffer:   bytes.NewBuffer(nil),
 	}
 }
 
 func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	c = &Context{handlers: c.handlers}
 	// 检查域名及请求方法
 	if hostname := r.Host; r.Method != "POST" || hostname != "weixin.chenlixin.net" || r.URL.Path != "/" {
 		fmt.Println(r.RemoteAddr, r.Method, r.Host, r.URL.Path, r.URL.RawQuery)
@@ -56,7 +49,7 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	timestamp := queryParams.Get("timestamp")
 	nonce := queryParams.Get("nonce")
 	openid := queryParams.Get("openid")
-	if !validateURL(signature, timestamp, nonce, c.token) {
+	if !validateURL(signature, timestamp, nonce, cfg.Token) {
 		w.WriteHeader(404)
 		w.Write([]byte("404"))
 		return
@@ -138,4 +131,15 @@ func (c *Context) Next() {
 		return
 	}
 	c.handlers[c.index].ServeMessage(c)
+}
+
+//Reset todo
+func (c *Context) Reset(h ...Handler) {
+	c.ResponseWriter = nil
+	c.Request = nil
+	c.OpenID = ""
+	c.Type = ""
+	c.Message = nil
+	c.index = 0
+	c.buffer.Reset()
 }
