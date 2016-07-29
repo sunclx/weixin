@@ -13,6 +13,7 @@ import (
 type Context struct {
 	//
 	ResponseWriter http.ResponseWriter
+	Request        *http.Request
 	//
 	OpenID  string
 	Type    string
@@ -72,6 +73,7 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// 设置Context的值
 	c.ResponseWriter = w
+	c.Request = r
 	c.OpenID = openid
 	c.Type = c.Message.MsgType
 	c.index = 0
