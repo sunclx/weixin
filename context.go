@@ -63,7 +63,7 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// 读取数据并Decode
 	data, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		c.ResponseText("数据错误")
+		// c.ResponseText("数据错误")
 		return
 	}
 	xml.Unmarshal(data, c.Message)
