@@ -35,7 +35,7 @@ func New() *Context {
 
 func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	//defer r.Body.Close()
-
+	c.Log("开始")
 	// 检查域名及请求方法
 	if hostname := r.Host; r.Method != "POST" || hostname != "weixin.chenlixin.net" || r.URL.Path != "/" {
 		fmt.Println(r.RemoteAddr, r.Method, r.Host, r.URL.Path, r.URL.RawQuery)
