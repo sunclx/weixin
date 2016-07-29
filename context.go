@@ -79,7 +79,6 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.buffer.WriteTo(c.ResponseWriter)
 	c.ResponseText(c.buffer.String())
 }
 
