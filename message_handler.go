@@ -15,16 +15,11 @@ type Message struct {
 
 func (m *Message) Write(data []byte) (int, error) {
 	if m.buffer == nil {
-		m.buffer = bytes.NewBuffer(data)
-		return len(data), nil
+		m.buffer = bytes.NewBuffer(nil)
 	}
 
 	return m.buffer.Write(data)
 }
-
-// func (m *Message) WriteString(s string) {
-// 	m.Write([]byte(s))
-// }
 
 func (m *Message) Printf(s string, a ...interface{}) {
 	fmt.Fprintf(m.buffer, s, a...)
@@ -51,7 +46,7 @@ func (m *Message) UseFunc(fns ...func(msg *Message)) *Message {
 
 func (m *Message) Begin() {
 	if m.messageHandlers == nil || len(m.messageHandlers) == 0 {
-		defaultMessageHandler(m)
+		return
 	}
 	m.messageHandlers[0].ServeMessage(m)
 
@@ -75,8 +70,4 @@ type MessageHandlerFunc func(msg *Message)
 
 func (m MessageHandlerFunc) ServeMessage(msg *Message) {
 	m(msg)
-}
-
-func defaultMessageHandler(m *Message) {
-	m.buffer.Reset()
 }
