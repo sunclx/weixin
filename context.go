@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -28,6 +27,7 @@ type Context struct {
 // New todo
 func New() *Context {
 	return &Context{
+		Message:  new(Text),
 		handlers: make([]Handler, 0, 8),
 		buffer:   bytes.NewBuffer(nil),
 	}
@@ -35,14 +35,13 @@ func New() *Context {
 
 func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	//defer r.Body.Close()
-	c.Log("开始\n")
 	// 检查域名及请求方法
 	if hostname := r.Host; r.Method != "POST" || hostname != "weixin.chenlixin.net" || r.URL.Path != "/" {
 		fmt.Println(r.RemoteAddr, r.Method, r.Host, r.URL.Path, r.URL.RawQuery)
 		w.Write([]byte("404"))
 		return
 	}
-	c.Log("建议参数\n")
+
 	// 检验请求参数
 	r.ParseForm()
 	queryParams := r.Form
@@ -60,21 +59,9 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c.ResponseWriter = w
 	c.Request = r
 	c.OpenID = openid
-	// 读取数据并Decode
-	data, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		// c.ResponseText("数据错误")
-		return
-	}
-	c.Log("测试数据\n")
-	if true {
-		c.Log("返回数据\n")
-		c.ResponseText("succcess")
-		c.Log("数据返回成功\n")
-		return
-	}
-	xml.Unmarshal(data, c.Message)
-
+	c.buffer.Reset()
+	c.buffer.ReadFrom(r.Body)
+	xml.Unmarshal(c.buffer.Bytes(), c.Message)
 	c.Type = c.Message.MsgType
 	c.index = 0
 	c.buffer.Reset()
