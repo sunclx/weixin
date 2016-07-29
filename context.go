@@ -41,7 +41,7 @@ func New() *Context {
 	}
 }
 
-func (s *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// 检查域名及请求方法
 	if hostname := r.Host; r.Method != "POST" || hostname != "weixin.chenlixin.net" || r.URL.Path != "/" {
 		fmt.Println(r.RemoteAddr, r.Method, r.Host, r.URL.Path, r.URL.RawQuery)
@@ -56,50 +56,43 @@ func (s *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	timestamp := queryParams.Get("timestamp")
 	nonce := queryParams.Get("nonce")
 	openid := queryParams.Get("openid")
-	if !validateURL(signature, timestamp, nonce, s.token) {
+	if !validateURL(signature, timestamp, nonce, c.token) {
+		w.WriteHeader(404)
 		w.Write([]byte("404"))
 		return
 	}
 
 	buffer := bytes.NewBuffer(nil)
-	buffer.Reset()
 	buffer.ReadFrom(r.Body)
 
 	var t Text
 	xml.Unmarshal(buffer.Bytes(), &t)
 
-	ctx := &Context{
-		ResponseWriter: w,
-		Request:        r,
+	c.ResponseWriter = w
+	c.Request = r
+	c.OpenID = openid
+	c.Type = t.MsgType
+	c.Message = &t
 
-		appID:     cfg.AppID,
-		token:     cfg.Token,
-		secruteID: cfg.SecruteID,
-
-		OpenID: openid,
-		Type:   t.MsgType,
-
-		Message: &t,
-	}
-
-	if ctx.handlers == nil || len(ctx.handlers) == 0 {
+	if c.handlers == nil || len(c.handlers) == 0 {
 		return
 	}
-	ctx.handlers[0].ServeMessage(ctx)
+	c.handlers[0].ServeMessage(c)
 
-	if ctx.Message.MsgType != MsgTypeText {
-		ctx.ResponseText("暂不支持此类型信息")
+	if c.Message.MsgType != MsgTypeText {
+		c.ResponseText("暂不支持此类型信息")
 		return
 	}
 
-	if ctx.buffer.Len() <= 0 {
-		ctx.ResponseText("你的信息格式错误")
+	if c.buffer.Len() <= 0 {
+		c.ResponseText("你的信息格式错误")
 		return
 	}
-	ctx.ResponseText(ctx.buffer.String())
+	c.ResponseText(c.buffer.String())
 
 }
 
+// Printf todo
 func (c *Context) Printf(s string, a ...interface{}) {
 	fmt.Fprintf(c.buffer, s, a...)
 }
@@ -118,10 +111,12 @@ func (c *Context) ResponseText(content string) {
 
 }
 
+// Use todo
 func (c *Context) Use(h ...Handler) {
 	c.handlers = append(c.handlers, h...)
 }
 
+// UseFunc todo
 func (c *Context) UseFunc(fns ...func(h *Context)) {
 	for _, fn := range fns {
 		c.handlers = append(c.handlers, HandlerFunc(fn))
@@ -129,11 +124,13 @@ func (c *Context) UseFunc(fns ...func(h *Context)) {
 
 }
 
+// Run todo
 func (c *Context) Run() {
 
 	http.ListenAndServe(":80", c)
 }
 
+// Next todo
 func (c *Context) Next() {
 	c.index++
 	if c.index >= len(c.handlers) {
