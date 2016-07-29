@@ -33,7 +33,7 @@ func New() *Context {
 }
 
 func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
+	//defer r.Body.Close()
 
 	// 检查域名及请求方法
 	if hostname := r.Host; r.Method != "POST" || hostname != "weixin.chenlixin.net" || r.URL.Path != "/" {
