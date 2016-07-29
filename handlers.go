@@ -1,8 +1,8 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
-	"time"
 )
 
 func logHandler(c *Context) {
@@ -13,21 +13,28 @@ func logHandler(c *Context) {
 func testHandler(c *Context) {
 
 	testID := "success-serveMux"
-	c.WriteString(fmt.Sprintf(`<xml>
-<ToUserName><![CDATA[%s]]></ToUserName>
-<FromUserName><![CDATA[%s]]></FromUserName>
-<CreateTime>%d</CreateTime>
-<MsgType><![CDATA[text]]></MsgType>
-<Content><![CDATA[%s]]></Content>
-</xml>`, c.OpenID, "gh_3fb3b0b8f2fa", time.Now().Unix(), testID))
+	c.ResponseText(testID)
 
 }
 
 func messageHandler(c *Context) {
 	if c.Message.MsgType != MsgTypeText {
-		c.WriteString(ResponseText(c.Message.FromUserName, cfg.DeveloperID, "暂不支持此类型信息"))
+		c.ResponseText("暂不支持此类型信息")
 		return
 	}
 
-	c.WriteString(ResponseText(c.Message.FromUserName, cfg.DeveloperID, handlePhone(c.Message)))
+	msg := &Message{
+		msg:             c.Message,
+		buffer:          bytes.NewBuffer(nil),
+		messageHandlers: make([]MessageHandler, 0, 8),
+	}
+
+	msg.UseFunc(handlePhone)
+	msg.UseFunc(handleBindPhone)
+
+	if msg.buffer.Len() < 0 {
+		c.Printf("success")
+		return
+	}
+	c.ResponseText(msg.buffer.String())
 }

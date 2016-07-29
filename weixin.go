@@ -51,5 +51,5 @@ func main() {
 	s.UseFunc(messageHandler)
 
 	//s.UseFunc(testHandler)
-	s.Run(":80")
+	s.Listen(":80")
 }

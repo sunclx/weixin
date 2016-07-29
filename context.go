@@ -1,6 +1,10 @@
 package main
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+	"time"
+)
 
 //Handler todo
 type Handler interface {
@@ -20,47 +24,46 @@ type Context struct {
 	ResponseWriter http.ResponseWriter
 	Request        *http.Request
 
-	//QueryParams url.Values // 回调请求 URL 的查询参数集合
-	//EncryptType  string     // 回调请求 URL 的加密方式参数: encrypt_type
-	//MsgSignature string // 回调请求 URL 的消息体签名参数: msg_signature
-	Signature string // 回调请求 URL 的签名参数: signature
-	Timestamp string // 回调请求 URL 的时间戳参数: timestamp
-	Nonce     string // 回调请求 URL 的随机数参数: nonce
-	OpenID    string
+	OpenID string
+	Type   MsgType
 
-	//MsgCiphertext []byte // 消息的密文文本
-	//MsgPlaintext  []byte    // 消息的明文文本, xml格式
 	Message *Text
-
-	//Token string // 当前消息所属公众号的 Token
-	//AESKey      []byte // 当前消息加密所用的 aes-key, read-only!!!
-	//Random      []byte // 当前消息加密所用的 random, 16-bytes
-	//AppId       string // 当前消息加密所用的 AppId
 
 	index    int
 	handlers []Handler
-
-	//kvs map[string]interface{}
 }
 
-// Start todo
-// func (ctx *Context) Start() {
-// 	ctx.handlers[ctx.index].ServeContext(ctx)
-// }
-
-// Next todo
-func (ctx *Context) Next() {
-	for ctx.index++; ctx.index < len(ctx.handlers); ctx.index++ {
-		ctx.handlers[ctx.index].ServeContext(ctx)
+// ServeContext todo
+func (c *Context) ServeContext(ctx *Context) {
+	if ctx != nil {
+		c = ctx
 	}
-	ctx.index--
+
+	for c.index++; c.index < len(c.handlers); c.index++ {
+		c.handlers[c.index].ServeContext(c)
+	}
+	c.index--
 }
 
-func (ctx *Context) Write(data []byte) (int, error) {
-	return ctx.ResponseWriter.Write(data)
+func (c *Context) Write(data []byte) (int, error) {
+	return c.ResponseWriter.Write(data)
 }
 
-// WriteString todo
-func (ctx *Context) WriteString(s string) {
-	ctx.Write([]byte(s))
+// Printf todo
+func (c *Context) Printf(s string, a ...interface{}) {
+	fmt.Fprintf(c.ResponseWriter, s, a...)
+}
+
+// ResponseText todo
+func (c *Context) ResponseText(content string) {
+	c.Printf(`
+<xml>
+<ToUserName><![CDATA[%s]]></ToUserName>
+<FromUserName><![CDATA[%s]]></FromUserName>
+<CreateTime>%d</CreateTime>
+<MsgType><![CDATA[text]]></MsgType>
+<Content><![CDATA[%s]]></Content>
+</xml>`,
+		c.OpenID, cfg.DeveloperID, time.Now().Unix(), content)
+
 }

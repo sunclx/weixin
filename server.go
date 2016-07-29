@@ -58,20 +58,18 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ResponseWriter: w,
 		Request:        r,
 
-		Signature: signature,
-		Timestamp: timestamp,
-		Nonce:     nonce,
-		OpenID:    openid,
+		OpenID: openid,
+		Type:   t.MsgType,
 
 		Message: &t,
 
 		index:    -1,
 		handlers: s.handlers,
 	}
-	ctx.Next()
+	ctx.ServeContext(nil)
 }
 
-func (s *Server) Run(addr string) error {
+func (s *Server) Listen(addr string) error {
 	return http.ListenAndServe(addr, s)
 }
 

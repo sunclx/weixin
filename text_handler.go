@@ -1,15 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/boltdb/bolt"
 )
-
-type MessageHandler interface {
-	ServeMessage(msg *Text)
-}
 
 const (
 	PrefixPhone         string = "手机 "
@@ -18,9 +13,10 @@ const (
 	PrefixStudentID     string = "学号 "
 )
 
-func handlePhone(t *Text) string {
+func handlePhone(msg *Message) {
+	t := msg.msg
 	if !strings.HasPrefix(t.Content, PrefixPhone) {
-		return "wrong"
+		msg.Next()
 	}
 
 	name := t.Content[len(PrefixPhone):]
@@ -28,16 +24,21 @@ func handlePhone(t *Text) string {
 	var n Contact
 	err := n.Get(name)
 	if err != nil {
-		return fmt.Sprintf("没有%s的号码", name)
+		msg.Printf("没有%s的号码", name)
 	}
 
-	return fmt.Sprintf("%s %s", name, n.PhoneNumber)
+	msg.Printf("%s %s", name, n.PhoneNumber)
 }
 
-func handleBindPhone(t *Text) string {
+func handleBindPhone(msg *Message) {
+	t := msg.msg
 	content := t.Content
 	result := strings.Fields(content)
 	name, phone := result[1], result[2]
+
+	if result[0] != PrefixBindPhone {
+		msg.Next()
+	}
 
 	db.Update(func(tx *bolt.Tx) error {
 		bx := tx.Bucket([]byte("phone"))
@@ -46,5 +47,6 @@ func handleBindPhone(t *Text) string {
 		return err
 	})
 
-	return "设置成功"
+	msg.Printf("设置成功")
+
 }
