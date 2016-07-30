@@ -77,7 +77,7 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 		err := c.Get(name)
 		if err != nil {
 			ctx.Errorln(err)
-			ctx.Printf("没有%s的号码", name)
+			ctx.Printf("没有%s的号码%d", name, len(parts))
 		}
 
 		ctx.Printf("%s %s", name, c.PhoneNumber)
