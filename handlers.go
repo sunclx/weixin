@@ -86,6 +86,7 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 	case "我的手机":
 		if len(parts) != 3 {
 			ctx.Printf("参数错误")
+			ctx.Infoln(parts)
 			return
 		}
 
