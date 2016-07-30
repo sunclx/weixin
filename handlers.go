@@ -151,6 +151,7 @@ func (o *openidHandler) ServeMessage(ctx *Context) {
 		}
 		o.Name = parts[1]
 		o.StudentID = parts[1]
+		o.Put(ctx.OpenID)
 		ctx.Printf("学号绑定成功")
 		return
 	}
