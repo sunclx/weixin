@@ -6,13 +6,15 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 //Context todo
 type Context struct {
 	//
 	ResponseWriter http.ResponseWriter
-	Request        *http.Request
+	*log.Logger
 	//
 	OpenID  string
 	Type    string
@@ -27,6 +29,7 @@ type Context struct {
 // New todo
 func New() *Context {
 	return &Context{
+		Logger:   lg,
 		Message:  new(Text),
 		handlers: make([]Handler, 0, 8),
 		buffer:   bytes.NewBuffer(nil),
@@ -57,7 +60,6 @@ func (c *Context) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// 设置Context的值
 	c.ResponseWriter = w
-	c.Request = r
 	c.OpenID = openid
 	c.buffer.Reset()
 	c.buffer.ReadFrom(r.Body)
@@ -88,7 +90,6 @@ func (c *Context) Printf(s string, a ...interface{}) {
 
 // ResponseText todo
 func (c *Context) ResponseText(content string) {
-	c.Log("start\n")
 	fmt.Fprintf(c.ResponseWriter, `
 	<xml>
 	<ToUserName><![CDATA[%s]]></ToUserName>
@@ -98,8 +99,6 @@ func (c *Context) ResponseText(content string) {
 	<Content><![CDATA[%s]]></Content>
 	</xml>`,
 		c.OpenID, cfg.DeveloperID, time.Now().Unix(), content)
-	c.Log("end\n")
-
 }
 
 // Use todo
@@ -117,8 +116,9 @@ func (c *Context) UseFunc(fns ...func(h *Context)) {
 
 // Run todo
 func (c *Context) Run() {
-
-	http.ListenAndServe(":80", c)
+	if err := http.ListenAndServe(":80", c); err != nil {
+		c.WithField("address", ":80").Fatalln(err)
+	}
 }
 
 // Next todo
@@ -129,10 +129,4 @@ func (c *Context) Next() {
 		return
 	}
 	c.handlers[c.index].ServeMessage(c)
-}
-
-// Log todo
-func (c *Context) Log(s string) {
-
-	f.Write([]byte(s))
 }

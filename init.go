@@ -3,17 +3,21 @@ package main
 import (
 	"crypto/sha1"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"os"
 	"sort"
 	"strings"
 
-	"github.com/boltdb/bolt"
+	log "github.com/Sirupsen/logrus"
+	"github.com/joyrexus/buckets"
+	"github.com/naoina/toml"
 )
 
-var db *bolt.DB
-var cfg *config
-var f io.Writer
+var (
+	cfg config
+	bx  *buckets.DB
+	lg  = log.New()
+)
 
 type config struct {
 	DeveloperID string
@@ -24,19 +28,28 @@ type config struct {
 }
 
 func init() {
+	//初始化logger
+	f, err := os.Open("/root/weixin/weixin.log")
+	if err != nil {
+		panic(err)
+	}
+	lg.Out = f
+
 	//初始化配置
-	cfg = &config{
-		DeveloperID: "gh_3fb3b0b8f2fa",
-		AppID:       "",
-		Token:       "njmu0917",
-		SecruteID:   "",
-		DBPath:      "/root/data.db",
+	buf, err := ioutil.ReadFile("/root/weixin/config.toml")
+	if err != nil {
+		lg.WithField("filepath", "/root/weixin/config.toml").Fatalln("打开配置文件失败")
+	}
+
+	if err := toml.Unmarshal(buf, &cfg); err != nil {
+		lg.Errorln(err)
 	}
 
 	//设置数据库
-	db, _ = bolt.Open(cfg.DBPath, 0600, nil)
-
-	f, _ = os.Create("/root/log.log")
+	bx, err = buckets.Open(cfg.DBPath)
+	if err != nil {
+		lg.Errorln(err)
+	}
 
 }
 
