@@ -72,18 +72,21 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 		if len(parts) != 2 {
 			ctx.Printf("参数错误")
 			ctx.Infoln(parts)
+			return
 		}
 		name := parts[1]
 		err := c.Get(name)
 		if err != nil {
-			ctx.Errorln(err)
-			ctx.Printf("没有%s的号码%d", name, len(parts))
+			ctx.WithError(err).Info(parts)
+			ctx.Printf("没有%s的号码", name)
+			return
 		}
 
 		ctx.Printf("%s %s", name, c.PhoneNumber)
 	case "我的手机":
 		if len(parts) != 3 {
 			ctx.Printf("参数错误")
+			return
 		}
 
 		name, phone := parts[1], parts[2]
