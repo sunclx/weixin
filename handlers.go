@@ -141,12 +141,6 @@ type openidHandler struct {
 }
 
 func (o *openidHandler) ServeMessage(ctx *Context) {
-	err := o.Get(ctx.OpenID)
-	if err != nil {
-		ctx.Printf(`请输入“我的学号 00000000”`)
-		return
-	}
-
 	content := ctx.Message.Content
 	parts := strings.Fields(content)
 	switch parts[0] {
@@ -158,6 +152,12 @@ func (o *openidHandler) ServeMessage(ctx *Context) {
 		o.Name = parts[1]
 		o.StudentID = parts[1]
 		ctx.Printf("学号绑定成功")
+		return
+	}
+
+	err := o.Get(ctx.OpenID)
+	if err != nil {
+		ctx.Printf(`请输入“我的学号 00000000”`)
 		return
 	}
 
