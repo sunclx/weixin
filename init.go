@@ -29,9 +29,12 @@ type config struct {
 
 func init() {
 	//初始化logger
-	f, err := os.Open("/root/weixin/weixin.log")
-	if err != nil {
-		panic(err)
+	_, err := os.Stat("/root/weixin/weixin.log")
+	var f *os.File
+	if err == nil || os.IsExist(err) {
+		f, _ = os.Open("/root/weixin/weixin.log")
+	} else {
+		f, _ = os.Create("/root/weixin/weixin.log")
 	}
 	lg.Out = f
 
