@@ -53,6 +53,16 @@ func init() {
 
 }
 
+// Text todo
+type Text struct {
+	ToUserName   string `xml:"ToUserName"`
+	FromUserName string `xml:"FromUserName"`
+	CreateTime   int64  `xml:"CreateTime"`
+	MsgType      string `xml:"MsgType"`
+	Content      string `xml:"Content"`
+	MsgID        string `xml:"MsgId"`
+}
+
 //验证函数
 func validateURL(signature, timestamp, nonce, token string) bool {
 	//排序参数并合并
