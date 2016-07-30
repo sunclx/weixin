@@ -29,14 +29,7 @@ type config struct {
 
 func init() {
 	//初始化logger
-	_, err := os.Stat("/root/weixin/weixin.log")
-	var f *os.File
-	if err == nil || os.IsExist(err) {
-		f, _ = os.Open("/root/weixin/weixin.log")
-	} else {
-		f, _ = os.Create("/root/weixin/weixin.log")
-	}
-	lg.Out = f
+	lg.Out, _ = os.OpenFile("/root/weixin/weixin.log", os.O_RDWR|os.O_CREATE, 0777)
 
 	//初始化配置
 	buf, err := ioutil.ReadFile("/root/weixin/config.toml")
