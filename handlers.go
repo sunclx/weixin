@@ -33,6 +33,7 @@ type PersonInfo struct {
 //Get todo
 func (p *PersonInfo) Get(openid string) error {
 	return db.View(func(tx *bolt.Tx) error {
+		tx.CreateBucketIfNotExists([]byte("PersonInfo"))
 		bx := tx.Bucket([]byte("PersonInfo"))
 		data := bx.Get([]byte(openid))
 		return json.Unmarshal(data, p)
