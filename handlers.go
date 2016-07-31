@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/boltdb/bolt"
@@ -55,53 +54,13 @@ func (p *PersonInfo) Put(openid string) error {
 	})
 }
 
-// Contact todo
-type Contact struct {
-	PhoneNumber string
-}
-
-//Get todo
-func (c *Contact) Get(openid string) error {
-	bt, err := bx.New([]byte("Contacts"))
-	if err != nil {
-		return err
-	}
-
-	data, err := bt.Get([]byte(openid))
-	if err != nil {
-		return err
-	}
-
-	if c == nil {
-		c = &Contact{}
-	}
-	_, err = fmt.Sscanf(string(data), "%s", &(c.PhoneNumber))
-	return err
-
-}
-
-// Put todo
-func (c *Contact) Put(openid string) error {
-	if c == nil {
-		return errors.New("empty contact")
-	}
-
-	bt, err := bx.New([]byte("Contacts"))
-	if err != nil {
-		return err
-	}
-
-	return bt.Put([]byte(openid), []byte(fmt.Sprintf("%s", c.PhoneNumber)))
-}
-
 type contactHandler struct {
-	Contact
+	PersonInfo PersonInfo
 }
 
 // ServeMessage todo
 func (c *contactHandler) ServeMessage(ctx *Context) {
-	content := ctx.Message.Content
-	parts := strings.Fields(content)
+	parts := strings.Fields(ctx.Message.Content)
 
 	switch parts[0] {
 	case "手机":
@@ -111,24 +70,27 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 			return
 		}
 		name := parts[1]
-		err := c.Get(name)
+		err := c.PersonInfo.Get(ctx.OpenID)
 		if err != nil {
-			ctx.WithError(err).Info(parts)
+			ctx.Printf("服务器错误")
+			ctx.WithError(err).Errorln("获取个人信息错误")
+			return
+		}
+		if c.PersonInfo.PhoneNumber == "" {
 			ctx.Printf("没有%s的号码", name)
 			return
 		}
 
-		ctx.Printf("%s %s", name, c.PhoneNumber)
+		ctx.Printf("%s %s", c.PersonInfo.Name, c.PersonInfo.PhoneNumber)
 	case "我的手机":
-		if len(parts) != 3 {
+		if len(parts) != 2 {
 			ctx.Printf("参数错误")
 			ctx.Infoln(parts)
 			return
 		}
 
-		name, phone := parts[1], parts[2]
-		c.PhoneNumber = phone
-		c.Put(name)
+		c.PersonInfo.PhoneNumber = parts[1]
+		c.PersonInfo.Put(ctx.OpenID)
 
 		ctx.Printf("设置成功")
 	default:
