@@ -2,9 +2,12 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/boltdb/bolt"
 )
 
 // Handler todo
@@ -18,6 +21,38 @@ type HandlerFunc func(c *Context)
 // ServeMessage todo
 func (fn HandlerFunc) ServeMessage(c *Context) {
 	fn(c)
+}
+
+// PersonInfo todo
+type PersonInfo struct {
+	OpenID string
+
+	StudentID string
+	Name      string
+
+	PhoneNumber string
+}
+
+//Get todo
+func (p *PersonInfo) Get(openid string) error {
+	return db.View(func(tx *bolt.Tx) error {
+		bx := tx.Bucket([]byte("PersonInfo"))
+		data := bx.Get([]byte(openid))
+		return json.Unmarshal(data, p)
+	})
+
+}
+
+// Put todo
+func (p *PersonInfo) Put(openid string) error {
+	return db.Update(func(tx *bolt.Tx) error {
+		bx := tx.Bucket([]byte("PersonInfo"))
+		data, err := json.Marshal(p)
+		if err != nil {
+			return err
+		}
+		return bx.Put([]byte(openid), data)
+	})
 }
 
 // Contact todo

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/boltdb/bolt"
 	"github.com/joyrexus/buckets"
 	"github.com/naoina/toml"
 )
@@ -16,6 +17,7 @@ import (
 var (
 	cfg config
 	bx  *buckets.DB
+	db  *bolt.DB
 	lg  = log.New()
 )
 
@@ -30,6 +32,7 @@ type config struct {
 func init() {
 	//初始化logger
 	lg.Out, _ = os.OpenFile("/root/weixin/weixin.log", os.O_RDWR|os.O_CREATE, 0777)
+	db, _ = bolt.Open("/root/weixin/weixin.log", 0600, nil)
 
 	//初始化配置
 	buf, err := ioutil.ReadFile("/root/weixin/config.toml")
