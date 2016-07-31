@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
-	"errors"
 	"strings"
 
 	"github.com/boltdb/bolt"
@@ -99,65 +97,65 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 
 }
 
-type NameID struct {
-	Name      string
-	StudentID string
-}
+// type NameID struct {
+// 	Name      string
+// 	StudentID string
+// }
 
-func (n *NameID) Get(openid string) error {
-	bt, err := bx.New([]byte("NameID"))
-	if err != nil {
-		return err
-	}
+// func (n *NameID) Get(openid string) error {
+// 	bt, err := bx.New([]byte("NameID"))
+// 	if err != nil {
+// 		return err
+// 	}
 
-	data, err := bt.Get([]byte(openid))
-	if data == nil || err != nil {
-		return errors.New("Not Exist")
-	}
+// 	data, err := bt.Get([]byte(openid))
+// 	if data == nil || err != nil {
+// 		return errors.New("Not Exist")
+// 	}
 
-	parts := bytes.Split(data, []byte("&&"))
-	if len(parts) != 2 {
-		return errors.New("wrong data")
-	}
+// 	parts := bytes.Split(data, []byte("&&"))
+// 	if len(parts) != 2 {
+// 		return errors.New("wrong data")
+// 	}
 
-	n.Name = string(parts[0])
-	n.StudentID = string(parts[1])
-	return nil
-}
-func (n *NameID) Put(openid string) error {
-	bt, err := bx.New([]byte("NameID"))
-	if err != nil {
-		return err
-	}
+// 	n.Name = string(parts[0])
+// 	n.StudentID = string(parts[1])
+// 	return nil
+// }
+// func (n *NameID) Put(openid string) error {
+// 	bt, err := bx.New([]byte("NameID"))
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return bt.Put([]byte(openid), []byte(n.Name+"&&"+n.StudentID))
-}
+// 	return bt.Put([]byte(openid), []byte(n.Name+"&&"+n.StudentID))
+// }
 
-type openidHandler struct {
-	NameID
-}
+// type openidHandler struct {
+// 	NameID
+// }
 
-func (o *openidHandler) ServeMessage(ctx *Context) {
-	content := ctx.Message.Content
-	parts := strings.Fields(content)
-	switch parts[0] {
-	case "我的学号":
-		if len(parts) != 2 {
-			ctx.Printf("参数错误")
-			return
-		}
-		o.Name = parts[1]
-		o.StudentID = parts[1]
-		o.Put(ctx.OpenID)
-		ctx.Printf("学号绑定成功")
-		return
-	}
+// func (o *openidHandler) ServeMessage(ctx *Context) {
+// 	content := ctx.Message.Content
+// 	parts := strings.Fields(content)
+// 	switch parts[0] {
+// 	case "我的学号":
+// 		if len(parts) != 2 {
+// 			ctx.Printf("参数错误")
+// 			return
+// 		}
+// 		o.Name = parts[1]
+// 		o.StudentID = parts[1]
+// 		o.Put(ctx.OpenID)
+// 		ctx.Printf("学号绑定成功")
+// 		return
+// 	}
 
-	err := o.Get(ctx.OpenID)
-	if err != nil {
-		ctx.Printf(`请输入“我的学号 00000000”`)
-		return
-	}
+// 	err := o.Get(ctx.OpenID)
+// 	if err != nil {
+// 		ctx.Printf(`请输入“我的学号 00000000”`)
+// 		return
+// 	}
 
-	ctx.Next()
-}
+// 	ctx.Next()
+// }
