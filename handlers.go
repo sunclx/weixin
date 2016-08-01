@@ -99,12 +99,11 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 	}
 
 	if c.PersonInfo.Name == "" {
-		ctx.Printf(`请输入"我的姓名 XX"`)
+		ctx.Printf(`请输入"我的姓名 XXX"`)
 		return
 	}
 	if c.PersonInfo.StudentID == "" {
-		ctx.Printf(`请输入"我的学号 XXXXXXXX
-	"`)
+		ctx.Printf(`请输入"我的学号 XXXXXXXX"`)
 		return
 	}
 
