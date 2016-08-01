@@ -76,8 +76,13 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 	switch parts[0] {
 	case "我的姓名":
 		if len(parts) != 2 {
-			ctx.Printf("参数错误")
-			ctx.Infoln(parts)
+			ctx.Printf(`
+信息格式错误
+输入"我的姓名 XXX"设置姓名
+输入"我的学号 XXXXXXXX"设置学号
+输入"我的手机 XXX"设置手机
+输入"手机 姓名"查询手机号码
+			`)
 			return
 		}
 
@@ -91,8 +96,13 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 		return
 	case "我的学号":
 		if len(parts) != 2 {
-			ctx.Printf("参数错误")
-			ctx.Infoln(parts)
+			ctx.Printf(`
+信息格式错误
+输入"我的姓名 XXX"设置姓名
+输入"我的学号 XXXXXXXX"设置学号
+输入"我的手机 XXX"设置手机
+输入"手机 姓名"查询手机号码
+			`)
 			return
 		}
 
@@ -115,11 +125,11 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 	case "手机":
 		if len(parts) != 2 {
 			ctx.Printf(`
-			信息格式错误
-			输入"我的姓名 XXX"设置姓名
-			输入"我的学号 XXXXXXXX"设置学号
-			输入"我的手机 XXX"设置手机
-			输入"手机 姓名"查询手机号码
+信息格式错误
+输入"我的姓名 XXX"设置姓名
+输入"我的学号 XXXXXXXX"设置学号
+输入"我的手机 XXX"设置手机
+输入"手机 姓名"查询手机号码
 			`)
 			ctx.Infoln(parts)
 			return
@@ -146,11 +156,11 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 	case "我的手机":
 		if len(parts) != 2 {
 			ctx.Printf(`
-			信息格式错误
-			输入"我的姓名 XXX"设置姓名
-			输入"我的学号 XXXXXXXX"设置学号
-			输入"我的手机 XXX"设置手机
-			输入"手机 姓名"查询手机号码
+信息格式错误
+输入"我的姓名 XXX"设置姓名
+输入"我的学号 XXXXXXXX"设置学号
+输入"我的手机 XXX"设置手机
+输入"手机 姓名"查询手机号码
 			`)
 			ctx.Infoln(parts)
 			return
@@ -160,12 +170,6 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 		c.PersonInfo.Put(ctx.OpenID)
 
 		ctx.Printf("设置成功")
-	case "绑定姓名":
-		if len(parts) != 2 {
-			ctx.Printf("参数错误")
-			ctx.Infoln(parts)
-			return
-		}
 
 	default:
 		ctx.Next()
