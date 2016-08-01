@@ -32,7 +32,7 @@ type PersonInfo struct {
 
 //Get todo
 func (p *PersonInfo) Get(openid string) error {
-	return db.View(func(tx *bolt.Tx) error {
+	return db.Update(func(tx *bolt.Tx) error {
 		tx.CreateBucketIfNotExists([]byte("PersonInfo"))
 		bx := tx.Bucket([]byte("PersonInfo"))
 		data := bx.Get([]byte(openid))
@@ -61,10 +61,10 @@ type contactHandler struct {
 func (c *contactHandler) ServeMessage(ctx *Context) {
 	parts := strings.Fields(ctx.Message.Content)
 	err := c.PersonInfo.Get(ctx.OpenID)
-	if true {
-		ctx.Printf("success")
-		return
-	}
+	// if true {
+	// 	ctx.Printf("success")
+	// 	return
+	// }
 	if err != nil {
 		ctx.Printf("服务器错误")
 		ctx.WithError(err).Errorln("获取个人信息错误")
