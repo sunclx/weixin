@@ -36,6 +36,9 @@ func (p *PersonInfo) Get(openid string) error {
 		tx.CreateBucketIfNotExists([]byte("PersonInfo"))
 		bx := tx.Bucket([]byte("PersonInfo"))
 		data := bx.Get([]byte(openid))
+		if data == nil || string(data) == "" {
+			data = []byte("{}")
+		}
 		return json.Unmarshal(data, p)
 	})
 
