@@ -32,12 +32,11 @@ type PersonInfo struct {
 
 //Get todo
 func (p *PersonInfo) Get(openid string) error {
-	return db.Update(func(tx *bolt.Tx) error {
-		tx.CreateBucketIfNotExists([]byte("PersonInfo"))
+	return db.View(func(tx *bolt.Tx) error {
 		bx := tx.Bucket([]byte("PersonInfo"))
 		data := bx.Get([]byte(openid))
 		if data == nil || string(data) == "" {
-			data = []byte("{}")
+			return nil
 		}
 		return json.Unmarshal(data, p)
 	})
@@ -115,14 +114,26 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 	switch parts[0] {
 	case "手机":
 		if len(parts) != 2 {
-			ctx.Printf("参数错误")
+			ctx.Printf(`
+			信息格式错误
+			输入"我的姓名 XXX"设置姓名
+			输入"我的学号 XXXXXXXX"设置学号
+			输入"我的手机 XXX"设置手机
+			输入"手机 姓名"查询手机号码
+			`)
 			ctx.Infoln(parts)
 			return
 		}
 		name := parts[1]
-		err := c.PersonInfo.Get(ctx.OpenID)
+		openid := ""
+		db.Update(func(tx *bolt.Tx) error {
+			bx, _ := tx.CreateBucketIfNotExists([]byte("NameOpenID"))
+			openid = string(bx.Get([]byte(name)))
+			return nil
+		})
+		err := c.PersonInfo.Get(openid)
 		if err != nil {
-			ctx.Printf("服务器错误")
+			ctx.Printf(`服务器错误`)
 			ctx.WithError(err).Errorln("获取个人信息错误")
 			return
 		}
@@ -132,9 +143,15 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 		}
 
 		ctx.Printf("%s %s", c.PersonInfo.Name, c.PersonInfo.PhoneNumber)
-	case "绑定手机":
+	case "我的手机":
 		if len(parts) != 2 {
-			ctx.Printf("参数错误")
+			ctx.Printf(`
+			信息格式错误
+			输入"我的姓名 XXX"设置姓名
+			输入"我的学号 XXXXXXXX"设置学号
+			输入"我的手机 XXX"设置手机
+			输入"手机 姓名"查询手机号码
+			`)
 			ctx.Infoln(parts)
 			return
 		}
