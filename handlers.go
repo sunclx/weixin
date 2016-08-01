@@ -78,7 +78,7 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 		c.PersonInfo.Name = parts[1]
 		c.PersonInfo.Put(ctx.OpenID)
 		db.Update(func(tx *bolt.Tx) error {
-			bx := tx.Bucket([]byte("NameOpenID"))
+			bx, _ := tx.CreateBucketIfNotExists([]byte("NameOpenID"))
 			return bx.Put([]byte(c.PersonInfo.Name), []byte(ctx.OpenID))
 		})
 		ctx.Printf("设置成功")
@@ -94,8 +94,6 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 		c.PersonInfo.Put(ctx.OpenID)
 		ctx.Printf("设置成功")
 		return
-	default:
-		ctx.Next()
 	}
 
 	if c.PersonInfo.Name == "" {
