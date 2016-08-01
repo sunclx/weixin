@@ -60,6 +60,53 @@ type contactHandler struct {
 // ServeMessage todo
 func (c *contactHandler) ServeMessage(ctx *Context) {
 	parts := strings.Fields(ctx.Message.Content)
+	err := c.PersonInfo.Get(ctx.OpenID)
+	if err != nil {
+		ctx.Printf("服务器错误")
+		ctx.WithError(err).Errorln("获取个人信息错误")
+		return
+	}
+
+	switch parts[0] {
+	case "我的姓名":
+		if len(parts) != 2 {
+			ctx.Printf("参数错误")
+			ctx.Infoln(parts)
+			return
+		}
+
+		c.PersonInfo.Name = parts[1]
+		c.PersonInfo.Put(ctx.OpenID)
+		db.Update(func(tx *bolt.Tx) error {
+			bx := tx.Bucket([]byte("NameOpenID"))
+			return bx.Put([]byte(c.PersonInfo.Name), []byte(ctx.OpenID))
+		})
+		ctx.Printf("设置成功")
+		return
+	case "我的学号":
+		if len(parts) != 2 {
+			ctx.Printf("参数错误")
+			ctx.Infoln(parts)
+			return
+		}
+
+		c.PersonInfo.StudentID = parts[1]
+		c.PersonInfo.Put(ctx.OpenID)
+		ctx.Printf("设置成功")
+		return
+	default:
+		ctx.Next()
+	}
+
+	if c.PersonInfo.Name == "" {
+		ctx.Printf(`请输入"我的姓名 XX"`)
+		return
+	}
+	if c.PersonInfo.StudentID == "" {
+		ctx.Printf(`请输入"我的学号 XXXXXXXX
+	"`)
+		return
+	}
 
 	switch parts[0] {
 	case "手机":
@@ -81,7 +128,7 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 		}
 
 		ctx.Printf("%s %s", c.PersonInfo.Name, c.PersonInfo.PhoneNumber)
-	case "我的手机":
+	case "绑定手机":
 		if len(parts) != 2 {
 			ctx.Printf("参数错误")
 			ctx.Infoln(parts)
@@ -92,10 +139,57 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 		c.PersonInfo.Put(ctx.OpenID)
 
 		ctx.Printf("设置成功")
+	case "绑定姓名":
+		if len(parts) != 2 {
+			ctx.Printf("参数错误")
+			ctx.Infoln(parts)
+			return
+		}
+
 	default:
 		ctx.Next()
 	}
 
+}
+
+type NameOpenID map[string]string
+
+func (n *NameOpenID) ServeMessage(c *Context) {
+	db.Update(func(tx *bolt.Tx) error {
+		bx := tx.Bucket([]byte("NameOpenID"))
+		items := NameOpenID{
+			"": "",
+		}
+
+		var err error
+		for k, v := range items {
+			err = bx.Put([]byte(k), []byte(v))
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+type NameStudentID map[string]string
+
+func (n *NameStudentID) ServeMessage(c *Context) {
+	db.Update(func(tx *bolt.Tx) error {
+		bx := tx.Bucket([]byte("NameOpenID"))
+		items := NameOpenID{
+			"": "",
+		}
+
+		var err error
+		for k, v := range items {
+			err = bx.Put([]byte(k), []byte(v))
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 // type NameID struct {
