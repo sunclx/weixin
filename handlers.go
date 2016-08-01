@@ -131,7 +131,6 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 输入"我的手机 XXX"设置手机
 输入"手机 姓名"查询手机号码
 			`)
-			ctx.Infoln(parts)
 			return
 		}
 		name := parts[1]
@@ -141,18 +140,19 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 			openid = string(bx.Get([]byte(name)))
 			return nil
 		})
-		err := c.PersonInfo.Get(openid)
+		p := PersonInfo{}
+		err := p.Get(openid)
 		if err != nil {
 			ctx.Printf(`服务器错误`)
 			ctx.WithError(err).Errorln("获取个人信息错误")
 			return
 		}
-		if c.PersonInfo.PhoneNumber == "" {
+		if p.PhoneNumber == "" {
 			ctx.Printf("没有%s的号码", name)
 			return
 		}
 
-		ctx.Printf("%s %s", c.PersonInfo.Name, c.PersonInfo.PhoneNumber)
+		ctx.Printf("%s %s", p.Name, p.PhoneNumber)
 	case "我的手机":
 		if len(parts) != 2 {
 			ctx.Printf(`
