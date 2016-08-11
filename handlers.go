@@ -12,14 +12,6 @@ type Handler interface {
 	ServeMessage(c *Context)
 }
 
-// HandlerFunc todo
-type HandlerFunc func(c *Context)
-
-// ServeMessage todo
-func (fn HandlerFunc) ServeMessage(c *Context) {
-	fn(c)
-}
-
 // PersonInfo todo
 type PersonInfo struct {
 	OpenID string
@@ -44,71 +36,56 @@ func (p *PersonInfo) Get(openid string) error {
 }
 
 // Put todo
-func (p *PersonInfo) Put(openid string) error {
+func (p *PersonInfo) Put() error {
 	return db.Update(func(tx *bolt.Tx) error {
 		bx := tx.Bucket([]byte("PersonInfo"))
 		data, err := json.Marshal(p)
 		if err != nil {
 			return err
 		}
-		return bx.Put([]byte(openid), data)
+		return bx.Put([]byte(p.OpenID), data)
 	})
 }
 
-type contactHandler struct {
-	PersonInfo PersonInfo
+type defaultHandler struct {
+	PersonInfo *PersonInfo
 }
 
-// ServeMessage todo
-func (c *contactHandler) ServeMessage(ctx *Context) {
-	parts := strings.Fields(ctx.Message.Content)
+func (c *defaultHandler) ServeMessage(ctx *Context) {
+	paramters := strings.Fields(ctx.Message.Content)
+	command := paramters[0]
 	err := c.PersonInfo.Get(ctx.OpenID)
-	// if true {
-	// 	ctx.Printf("success")
-	// 	return
-	// }
 	if err != nil {
-		ctx.Printf("服务器错误")
-		ctx.WithError(err).Errorln("获取个人信息错误")
+		ctx.LogWithError(err).Infof("获取openid: %s个人信息错误", ctx.OpenID)
 		return
 	}
 
-	switch parts[0] {
+	switch command {
 	case "我的姓名":
-		if len(parts) != 2 {
-			ctx.Printf(`
-信息格式错误
-输入"我的姓名 XXX"设置姓名
-输入"我的学号 XXXXXXXX"设置学号
-输入"我的手机 XXX"设置手机
-输入"手机 姓名"查询手机号码
-			`)
+		if len(paramters) != 2 {
 			return
 		}
-
-		c.PersonInfo.Name = parts[1]
-		c.PersonInfo.Put(ctx.OpenID)
-		db.Update(func(tx *bolt.Tx) error {
-			bx, _ := tx.CreateBucketIfNotExists([]byte("NameOpenID"))
-			return bx.Put([]byte(c.PersonInfo.Name), []byte(ctx.OpenID))
-		})
-		ctx.Printf("设置成功")
+		if c.PersonInfo.Name != "" {
+			ctx.Printf("你的姓名是%s,如错误请联系管理员", c.PersonInfo.Name)
+			return
+		}
+		c.PersonInfo.OpenID = ctx.OpenID
+		c.PersonInfo.Name = paramters[1]
+		c.PersonInfo.Put()
+		ctx.Printf("姓名设置成功")
 		return
 	case "我的学号":
-		if len(parts) != 2 {
-			ctx.Printf(`
-信息格式错误
-输入"我的姓名 XXX"设置姓名
-输入"我的学号 XXXXXXXX"设置学号
-输入"我的手机 XXX"设置手机
-输入"手机 姓名"查询手机号码
-			`)
+		if len(paramters) != 2 {
 			return
 		}
-
-		c.PersonInfo.StudentID = parts[1]
-		c.PersonInfo.Put(ctx.OpenID)
-		ctx.Printf("设置成功")
+		if c.PersonInfo.StudentID != "" {
+			ctx.Printf("你的学号是%s,错误请联系管理员", c.PersonInfo.StudentID)
+			return
+		}
+		c.PersonInfo.OpenID = ctx.OpenID
+		c.PersonInfo.StudentID = paramters[1]
+		c.PersonInfo.Put()
+		ctx.Printf("学号设置成功")
 		return
 	}
 
@@ -120,10 +97,18 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 		ctx.Printf(`请输入"我的学号 XXXXXXXX"`)
 		return
 	}
+}
 
-	switch parts[0] {
+type contactHandler struct {
+	PersonInfo *PersonInfo
+}
+
+// ServeMessage todo
+func (c *contactHandler) ServeMessage(ctx *Context) {
+	paramters := strings.Fields(ctx.Message.Content)
+	switch paramters[0] {
 	case "手机":
-		if len(parts) != 2 {
+		if len(paramters) != 2 {
 			ctx.Printf(`
 信息格式错误
 输入"我的姓名 XXX"设置姓名
@@ -133,7 +118,7 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 			`)
 			return
 		}
-		name := parts[1]
+		name := paramters[1]
 		openid := ""
 		db.Update(func(tx *bolt.Tx) error {
 			bx, _ := tx.CreateBucketIfNotExists([]byte("NameOpenID"))
@@ -144,7 +129,7 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 		err := p.Get(openid)
 		if err != nil {
 			ctx.Printf(`服务器错误`)
-			ctx.WithError(err).Errorln("获取个人信息错误")
+			ctx.LogWithError(err).Errorln("获取个人信息错误")
 			return
 		}
 		if p.PhoneNumber == "" {
@@ -154,7 +139,7 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 
 		ctx.Printf("%s %s", p.Name, p.PhoneNumber)
 	case "我的手机":
-		if len(parts) != 2 {
+		if len(paramters) != 2 {
 			ctx.Printf(`
 信息格式错误
 输入"我的姓名 XXX"设置姓名
@@ -162,17 +147,16 @@ func (c *contactHandler) ServeMessage(ctx *Context) {
 输入"我的手机 XXX"设置手机
 输入"手机 姓名"查询手机号码
 			`)
-			ctx.Infoln(parts)
 			return
 		}
-
-		c.PersonInfo.PhoneNumber = parts[1]
-		c.PersonInfo.Put(ctx.OpenID)
+		c.PersonInfo.OpenID = ctx.OpenID
+		c.PersonInfo.PhoneNumber = paramters[1]
+		c.PersonInfo.Put()
 
 		ctx.Printf("设置成功")
 
-	default:
-		ctx.Next()
+		// default:
+		// 	ctx.Next()
 	}
 
 }
@@ -217,65 +201,9 @@ func (n *NameStudentID) ServeMessage(c *Context) {
 	})
 }
 
-// type NameID struct {
-// 	Name      string
-// 	StudentID string
-// }
-
-// func (n *NameID) Get(openid string) error {
-// 	bt, err := bx.New([]byte("NameID"))
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	data, err := bt.Get([]byte(openid))
-// 	if data == nil || err != nil {
-// 		return errors.New("Not Exist")
-// 	}
-
-// 	parts := bytes.Split(data, []byte("&&"))
-// 	if len(parts) != 2 {
-// 		return errors.New("wrong data")
-// 	}
-
-// 	n.Name = string(parts[0])
-// 	n.StudentID = string(parts[1])
-// 	return nil
-// }
-// func (n *NameID) Put(openid string) error {
-// 	bt, err := bx.New([]byte("NameID"))
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return bt.Put([]byte(openid), []byte(n.Name+"&&"+n.StudentID))
-// }
-
-// type openidHandler struct {
-// 	NameID
-// }
-
-// func (o *openidHandler) ServeMessage(ctx *Context) {
-// 	content := ctx.Message.Content
-// 	parts := strings.Fields(content)
-// 	switch parts[0] {
-// 	case "我的学号":
-// 		if len(parts) != 2 {
-// 			ctx.Printf("参数错误")
-// 			return
-// 		}
-// 		o.Name = parts[1]
-// 		o.StudentID = parts[1]
-// 		o.Put(ctx.OpenID)
-// 		ctx.Printf("学号绑定成功")
-// 		return
-// 	}
-
-// 	err := o.Get(ctx.OpenID)
-// 	if err != nil {
-// 		ctx.Printf(`请输入“我的学号 00000000”`)
-// 		return
-// 	}
-
-// 	ctx.Next()
-// }
+// 信息格式错误
+// 输入"我的姓名 XXX"设置姓名
+// 输入"我的学号 XXXXXXXX"设置学号
+// 输入"我的手机 XXX"设置手机
+// 输入"手机 姓名"查询手机号码
+// 			`)

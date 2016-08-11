@@ -1,23 +1,20 @@
 package main
 
 import (
-	"crypto/sha1"
-	"fmt"
 	"io/ioutil"
 	"os"
-	"sort"
-	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	"github.com/Sirupsen/logrus"
 	"github.com/boltdb/bolt"
 	"github.com/naoina/toml"
 )
 
 var (
-	cfg config
+	configFile = "/root/weixin/config.toml"
+	cfg        config
 	//	bx  *buckets.DB
 	db *bolt.DB
-	lg = log.New()
+	lg = logrus.New()
 )
 
 type config struct {
@@ -29,21 +26,22 @@ type config struct {
 }
 
 func init() {
+	var err error
+
 	//初始化logger
-	lg.Out, _ = os.OpenFile("/root/weixin/weixin.log", os.O_RDWR|os.O_CREATE, 0777)
+	lg.Out, err = os.OpenFile("/root/weixin/weixin.log", os.O_RDWR|os.O_CREATE, 0777)
+	fatalError(err)
 
 	//初始化配置
-	buf, err := ioutil.ReadFile("/root/weixin/config.toml")
-	if err != nil {
-		lg.WithField("filepath", "/root/weixin/config.toml").Fatalln("打开配置文件失败")
-	}
+	buf, err := ioutil.ReadFile(configFile)
+	fatalError(err)
 
-	if err := toml.Unmarshal(buf, &cfg); err != nil {
-		lg.Errorln(err)
-	}
+	err = toml.Unmarshal(buf, &cfg)
+	fatalError(err)
 
 	//设置数据库
-	db, _ = bolt.Open(cfg.DBPath, 0600, nil)
+	db, err = bolt.Open(cfg.DBPath, 0600, nil)
+	fatalError(err)
 
 }
 
@@ -55,23 +53,4 @@ type Text struct {
 	MsgType      string `xml:"MsgType"`
 	Content      string `xml:"Content"`
 	MsgID        string `xml:"MsgId"`
-}
-
-//验证函数
-func validateURL(signature, timestamp, nonce, token string) bool {
-	//排序参数并合并
-	ss := []string{token, timestamp, nonce}
-	sort.Strings(ss)
-	s := strings.Join(ss, "")
-
-	//计算sha1的值
-	h := sha1.New()
-	h.Write([]byte(s))
-	bs := h.Sum(nil)
-
-	//比较计算的signature与获取值比较
-	if signatureHex := fmt.Sprintf("%x", bs); signatureHex != signature {
-		return false
-	}
-	return true
 }
