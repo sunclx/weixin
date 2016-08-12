@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha1"
 	"fmt"
+	"net/http"
 	"sort"
 	"strings"
 )
@@ -27,6 +28,24 @@ func validateURL(signature, timestamp, nonce, token string) bool {
 
 	//比较计算的signature与获取值比较
 	if signatureHex := fmt.Sprintf("%x", bs); signatureHex != signature {
+		return false
+	}
+	return true
+}
+
+func isValidateRequest(r *http.Request) bool {
+	// 检查域名及请求方法
+	if hostname := r.Host; r.Method != "POST" || hostname != "weixin.chenlixin.net" || r.URL.Path != "/" {
+		fmt.Println(r.RemoteAddr, r.Method, r.Host, r.URL.Path, r.URL.RawQuery)
+		return false
+	}
+
+	// 检验请求参数
+	r.ParseForm()
+	signature := r.Form.Get("signature")
+	timestamp := r.Form.Get("timestamp")
+	nonce := r.Form.Get("nonce")
+	if !validateURL(signature, timestamp, nonce, cfg.Token) {
 		return false
 	}
 	return true
