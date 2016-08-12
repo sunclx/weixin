@@ -34,6 +34,7 @@ func New() *App {
 func (c *App) addDefaultCommand() {
 	c.Command("我的姓名", func(ctx *Context) {
 		if ctx.ArgsLen() != 2 {
+			c.Text("我的姓名 XXX")
 			return
 		}
 		if ctx.PersonInfo.Name != "" {
