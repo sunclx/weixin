@@ -11,7 +11,7 @@ func main() {
 			ctx.app.Printf("wrong")
 			return
 		}
-		name := ctx.Arg(1)
+		name := ctx.Arg(0)
 		var openid string
 		db.Update(func(tx *bolt.Tx) error {
 			data := tx.Bucket([]byte("NameOpenID")).Get([]byte(name))
