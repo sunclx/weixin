@@ -41,7 +41,7 @@ func NewContext(app *App, r io.Reader) (*Context, error) {
 	// 获取Command
 	ss := strings.Fields(ctx.Message.Content)
 	ctx.commandName = ss[0]
-	if len(ss) > 2 {
+	if len(ss) > 1 {
 		ctx.commandArguments = ss[1:]
 	} else {
 		ctx.commandArguments = []string{}
