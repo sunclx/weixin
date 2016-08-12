@@ -82,6 +82,7 @@ func (c *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c.outBuffer.Reset()
 
 	ctx, err := NewContext(c, r.Body)
+	c.LogWithFiled("openid", c.OpenID).Infoln(ctx)
 	if err != nil {
 		return
 	}
