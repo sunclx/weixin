@@ -70,16 +70,18 @@ func (c *App) Run() {
 
 // ServeHTTP todo
 func (c *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	c.ResponseWriter = w
-	c.OpenID = r.Form.Get("openid")
-	c.outBuffer.Reset()
-
 	if isValidateRequest(r) {
 		w.WriteHeader(404)
 		w.Write([]byte("404"))
 		return
 	}
+
+	c.ResponseWriter = w
+	c.OpenID = r.Form.Get("openid")
+	c.outBuffer.Reset()
+
 	if true {
+		c.LogWithFiled("openid", c.OpenID)
 		c.Text("success")
 		return
 	}
