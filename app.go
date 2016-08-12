@@ -38,13 +38,13 @@ func (c *App) addDefaultCommand() {
 			return
 		}
 		if ctx.PersonInfo.Name != "" {
-			c.Printf("你的姓名是%s,如错误请联系管理员", ctx.PersonInfo.Name)
+			c.Text("你的姓名是" + ctx.PersonInfo.Name + "如错误请联系管理员")
 			return
 		}
 		ctx.PersonInfo.OpenID = ctx.Message.FromUserName
 		ctx.PersonInfo.Name = ctx.Arg(0)
 		ctx.PersonInfo.Put()
-		c.Printf("姓名设置成功")
+		c.Text("姓名设置成功")
 	})
 
 	c.Command("我的学号", func(ctx *Context) {
