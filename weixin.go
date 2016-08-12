@@ -7,7 +7,7 @@ func main() {
 	c := New()
 
 	c.Command("手机", func(ctx *Context) {
-		if ctx.ArgsLen() != 2 {
+		if ctx.ArgsLen() != 1 {
 			ctx.app.Printf("wrong")
 			return
 		}

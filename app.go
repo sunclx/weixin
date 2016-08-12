@@ -33,7 +33,7 @@ func New() *App {
 // Run todo
 func (c *App) addDefaultCommand() {
 	c.Command("我的姓名", func(ctx *Context) {
-		if ctx.ArgsLen() != 2 {
+		if ctx.ArgsLen() != 1 {
 			c.Text("我的姓名 XXX")
 			return
 		}
@@ -48,7 +48,7 @@ func (c *App) addDefaultCommand() {
 	})
 
 	c.Command("我的学号", func(ctx *Context) {
-		if ctx.ArgsLen() != 2 {
+		if ctx.ArgsLen() != 1 {
 			return
 		}
 		if ctx.PersonInfo.StudentID != "" {
