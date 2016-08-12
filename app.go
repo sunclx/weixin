@@ -70,7 +70,7 @@ func (c *App) Run() {
 
 // ServeHTTP todo
 func (c *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if isValidateRequest(r) {
+	if !isValidateRequest(r) {
 		w.WriteHeader(404)
 		w.Write([]byte("404"))
 		return
