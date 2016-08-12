@@ -80,12 +80,6 @@ func (c *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c.OpenID = r.Form.Get("openid")
 	c.outBuffer.Reset()
 
-	if true {
-		c.LogWithFiled("openid", c.OpenID)
-		c.Text("success")
-		return
-	}
-
 	ctx, err := NewContext(c, r.Body)
 	if err != nil {
 		return
