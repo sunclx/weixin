@@ -3,6 +3,7 @@ package main
 import "github.com/boltdb/bolt"
 
 func main() {
+	lg.Info("start")
 	c := New()
 
 	c.Command("手机", func(ctx *Context) {
