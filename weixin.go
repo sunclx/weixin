@@ -64,6 +64,7 @@ func main() {
 			ctx.Printf(`服务器错误`)
 			return
 		}
+		log.Info(p)
 		if p.PhoneNumber == "" {
 			ctx.Printf("没有%s的号码", name)
 			return
