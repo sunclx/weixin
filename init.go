@@ -46,5 +46,13 @@ func init() {
 	//设置数据库
 	db, err = bolt.Open(cfg.DBPath, 0600, nil)
 	fatalError(err)
+	db.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte("NameOpenID"))
+		if err != nil {
+			return err
+		}
+		_, err = tx.CreateBucketIfNotExists([]byte("User"))
+		return err
+	})
 
 }
