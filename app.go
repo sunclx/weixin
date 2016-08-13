@@ -30,7 +30,7 @@ func (c *Cli) Run() {
 // ServeHTTP 实现了htto.Handler
 func (c *Cli) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	log.WithField("none", "").Info(w.Header)
+	log.WithField("none", "").Info(w.Header())
 	for _, handler := range c.handlers {
 		handler.ServeHTTP(nil, r)
 	}
@@ -64,7 +64,7 @@ func (c *Cli) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	log.WithField("openid", ctx.Message.FromUserName).Infof("%#v\n", ctx.Message)
+	log.WithField("openid", ctx.Message.FromUserName).Infof("%#v\n", ctx)
 
 	// 执行Command
 	switch command, ok := c.commands[ctx.CommandName()]; {
