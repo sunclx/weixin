@@ -11,7 +11,7 @@ import (
 
 func dbEditor() http.Handler {
 	r := gin.Default()
-	r.GET("/", Index)
+	r.GET("/db", Index)
 	r.GET("/buckets", Buckets)
 	r.POST("/createBucket", CreateBucket)
 	r.POST("/put", Put)
