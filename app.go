@@ -9,6 +9,7 @@ import (
 
 //Cli 是基本类型
 type Cli struct {
+	handlers []http.Handler
 	commands map[string]*Command
 }
 
@@ -28,7 +29,11 @@ func (c *Cli) Run() {
 
 // ServeHTTP 实现了htto.Handler
 func (c *Cli) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
 	log.WithField("none", "").Info(w.Header)
+	for _, handler := range c.handlers {
+		handler.ServeHTTP(nil, r)
+	}
 	// 验证请求
 	if !isValidateRequest(r) {
 		w.WriteHeader(404)
@@ -74,6 +79,16 @@ func (c *Cli) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	default:
 		command.Run(ctx)
 	}
+}
+
+// Use 添加一个新命令
+func (c *Cli) Use(h http.Handler) {
+	c.handlers = append(c.handlers, h)
+}
+
+// UseFunc 添加一个新命令
+func (c *Cli) UseFunc(fn func(w http.ResponseWriter, r *http.Request)) {
+	c.handlers = append(c.handlers, http.HandlerFunc(fn))
 }
 
 // Command 添加一个新命令
