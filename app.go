@@ -31,6 +31,7 @@ func (c *Cli) Run() {
 func (c *Cli) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for _, handler := range c.handlers {
 		handler.ServeHTTP(w, r)
+		return
 	}
 	// 验证请求
 	if !isValidateRequest(r) {
