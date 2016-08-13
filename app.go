@@ -5,26 +5,20 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	"github.com/Sirupsen/logrus"
 )
 
 //App todo
 type App struct {
-	//
 	OpenID         string
 	ResponseWriter http.ResponseWriter
 	//
 	commands  map[string]*Command
 	outBuffer *bytes.Buffer
-	//
-	log *logrus.Logger
 }
 
 // New todo
 func New() *App {
 	return &App{
-		log:       lg,
 		commands:  make(map[string]*Command),
 		outBuffer: bytes.NewBuffer(nil),
 	}
@@ -38,7 +32,7 @@ func (c *App) addDefaultCommand() {
 			return
 		}
 		if ctx.PersonInfo.Name != "" {
-			c.Text("你的姓名是" + ctx.PersonInfo.Name + "如错误请联系管理员")
+			c.Text("你的姓名是" + ctx.PersonInfo.Name + "，如错误请联系管理员")
 			return
 		}
 		ctx.PersonInfo.OpenID = ctx.Message.FromUserName
@@ -65,7 +59,7 @@ func (c *App) addDefaultCommand() {
 // Run todo
 func (c *App) Run() {
 	if err := http.ListenAndServe(":80", c); err != nil {
-		c.LogWithError(err).Fatal("启动失败")
+		log.WithError(err).Fatal("启动失败")
 	}
 }
 
@@ -78,14 +72,15 @@ func (c *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c.ResponseWriter = w
-	c.OpenID = r.Form.Get("openid")
 	c.outBuffer.Reset()
+	r.ParseForm()
+	c.OpenID = r.Form.Get("openid")
 
 	ctx, err := NewContext(c, r.Body)
-	c.LogWithFiled("openid", c.OpenID).Infoln(ctx)
 	if err != nil {
 		return
 	}
+	log.WithField("openid", c.OpenID).Infof("%#v\n", ctx)
 
 	c.addDefaultCommand()
 	command, ok := c.commands[ctx.CommandName()]
@@ -93,7 +88,6 @@ func (c *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		c.Text("不支持")
 		return
 	}
-
 	switch ctx.CommandName() {
 	case "我的姓名", "我的学号":
 		command.Action(ctx)
@@ -101,11 +95,11 @@ func (c *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if ctx.PersonInfo.Name == "" {
-		c.Printf(`请输入"我的姓名 XXX"`)
+		c.Text(`请输入"我的姓名 XXX"`)
 		return
 	}
 	if ctx.PersonInfo.StudentID == "" {
-		c.Printf(`请输入"我的学号 XXXXXXXX"`)
+		c.Text(`请输入"我的学号 XXXXXXXX"`)
 		return
 	}
 
@@ -133,16 +127,6 @@ func (c *App) Text(content string) {
 	<Content><![CDATA[%s]]></Content>
 	</xml>`,
 		c.OpenID, cfg.DeveloperID, time.Now().Unix(), content)
-}
-
-// LogWithError todo
-func (c *App) LogWithError(err error) *logrus.Entry {
-	return c.log.WithError(err)
-}
-
-// LogWithFiled todo
-func (c *App) LogWithFiled(key string, value interface{}) *logrus.Entry {
-	return c.log.WithField(key, value)
 }
 
 // Command todo

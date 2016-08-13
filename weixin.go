@@ -3,7 +3,6 @@ package main
 import "github.com/boltdb/bolt"
 
 func main() {
-	lg.Info("start")
 	c := New()
 
 	c.Command("手机", func(ctx *Context) {
@@ -22,7 +21,6 @@ func main() {
 		err := p.Get(openid)
 		if err != nil {
 			ctx.app.Printf(`服务器错误`)
-			ctx.app.LogWithError(err).Errorln("获取个人信息错误")
 			return
 		}
 		if p.PhoneNumber == "" {

@@ -13,8 +13,8 @@ var (
 	configFile = "/root/weixin/config.toml"
 	cfg        config
 	//	bx  *buckets.DB
-	db *bolt.DB
-	lg = logrus.New()
+	db  *bolt.DB
+	log = logrus.New()
 )
 
 type config struct {
@@ -29,7 +29,7 @@ func init() {
 	var err error
 
 	//初始化logger
-	lg.Out, err = os.OpenFile("/root/weixin/weixin.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
+	log.Out, err = os.OpenFile("/root/weixin/weixin.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0777)
 	fatalError(err)
 
 	//初始化配置

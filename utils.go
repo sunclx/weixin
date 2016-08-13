@@ -10,7 +10,7 @@ import (
 
 func fatalError(err error) {
 	if err != nil {
-		lg.Fatalln(err)
+		log.WithError(err).Fatal("程序错误")
 	}
 }
 
