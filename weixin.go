@@ -4,6 +4,7 @@ import "github.com/boltdb/bolt"
 
 func main() {
 	c := New()
+	c.Use(dbEditor())
 	c.Command("我的姓名", func(ctx *Context) {
 		if ctx.NArg() != 1 {
 			ctx.Print("我的姓名 XXX")
