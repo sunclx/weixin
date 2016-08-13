@@ -14,9 +14,10 @@ func main() {
 			return
 		}
 		ctx.User.OpenID = ctx.Message.FromUserName
-		ctx.User.Name = ctx.Arg(0)
-		ctx.User.Put()
-		ctx.Print("姓名设置成功")
+		ctx.User.Name = ctx.Arg(1)
+		if err := ctx.User.Put(); err == nil {
+			ctx.Print("姓名设置成功")
+		}
 	})
 
 	c.Command("我的学号", func(ctx *Context) {
@@ -28,9 +29,11 @@ func main() {
 			return
 		}
 		ctx.User.OpenID = ctx.Message.FromUserName
-		ctx.User.StudentID = ctx.Arg(0)
+		ctx.User.StudentID = ctx.Arg(1)
 		ctx.User.Put()
-		ctx.Printf("学号设置成功")
+		if err := ctx.User.Put(); err == nil {
+			ctx.Print("学号设置成功")
+		}
 	})
 
 	c.Command("手机", func(ctx *Context) {
