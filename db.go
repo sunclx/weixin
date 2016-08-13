@@ -20,7 +20,7 @@ func dbEditor() http.Handler {
 	r.POST("/deleteKey", c.DeleteKey)
 	r.POST("/deleteBucket", c.DeleteBucket)
 	r.POST("/prefixScan", c.PrefixScan)
-	//	r.GET("/web", sF.ServeFiles)
+	r.GET("/web/*filepath", sF.ServeFiles)
 	return r
 }
 
