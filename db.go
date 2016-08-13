@@ -9,8 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var Db = db
-
 func dbEditor() http.Handler {
 	r := gin.Default()
 	r.GET("/", Index)
@@ -33,7 +31,7 @@ func CreateBucket(c *gin.Context) {
 	if c.PostForm("bucket") == "" {
 		c.String(200, "no bucket name | n")
 	}
-	Db.Update(func(tx *bolt.Tx) error {
+	db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte(c.PostForm("bucket")))
 		b = b
 		if err != nil {
@@ -51,7 +49,7 @@ func DeleteBucket(c *gin.Context) {
 		c.String(200, "no bucket name | n")
 	}
 
-	Db.Update(func(tx *bolt.Tx) error {
+	db.Update(func(tx *bolt.Tx) error {
 		err := tx.DeleteBucket([]byte(c.PostForm("bucket")))
 
 		if err != nil {
@@ -73,7 +71,7 @@ func DeleteKey(c *gin.Context) {
 		c.String(200, "no bucket name or key | n")
 	}
 
-	Db.Update(func(tx *bolt.Tx) error {
+	db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte(c.PostForm("bucket")))
 		b = b
 		if err != nil {
@@ -103,7 +101,7 @@ func Put(c *gin.Context) {
 		c.String(200, "no bucket name or key | n")
 	}
 
-	Db.Update(func(tx *bolt.Tx) error {
+	db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte(c.PostForm("bucket")))
 		b = b
 		if err != nil {
@@ -137,7 +135,7 @@ func Get(c *gin.Context) {
 		c.JSON(200, res)
 	}
 
-	Db.View(func(tx *bolt.Tx) error {
+	db.View(func(tx *bolt.Tx) error {
 
 		b := tx.Bucket([]byte(c.PostForm("bucket")))
 
@@ -184,7 +182,7 @@ func PrefixScan(c *gin.Context) {
 
 	if c.PostForm("key") == "" {
 
-		Db.View(func(tx *bolt.Tx) error {
+		db.View(func(tx *bolt.Tx) error {
 			// Assume bucket exists and has keys
 			b := tx.Bucket([]byte(c.PostForm("bucket")))
 
@@ -214,7 +212,7 @@ func PrefixScan(c *gin.Context) {
 
 	} else {
 
-		Db.View(func(tx *bolt.Tx) error {
+		db.View(func(tx *bolt.Tx) error {
 			// Assume bucket exists and has keys
 			b := tx.Bucket([]byte(c.PostForm("bucket"))).Cursor()
 
@@ -251,7 +249,7 @@ func Buckets(c *gin.Context) {
 
 	res := []string{}
 
-	Db.View(func(tx *bolt.Tx) error {
+	db.View(func(tx *bolt.Tx) error {
 
 		return tx.ForEach(func(name []byte, _ *bolt.Bucket) error {
 
