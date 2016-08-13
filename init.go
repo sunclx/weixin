@@ -9,20 +9,25 @@ import (
 	"github.com/naoina/toml"
 )
 
-var (
-	configFile = "/root/weixin/config.toml"
-	cfg        config
-	//	bx  *buckets.DB
-	db  *bolt.DB
-	log = logrus.New()
-)
-
 type config struct {
 	DeveloperID string
 	AppID       string
 	Token       string
 	SecruteID   string
 	DBPath      string
+}
+
+var (
+	configFile = "/root/weixin/config.toml"
+	cfg        config
+	db         *bolt.DB
+	log        = logrus.New()
+)
+
+func fatalError(err error) {
+	if err != nil {
+		log.WithError(err).Fatal("程序错误")
+	}
 }
 
 func init() {
@@ -35,7 +40,6 @@ func init() {
 	//初始化配置
 	buf, err := ioutil.ReadFile(configFile)
 	fatalError(err)
-
 	err = toml.Unmarshal(buf, &cfg)
 	fatalError(err)
 
@@ -43,14 +47,4 @@ func init() {
 	db, err = bolt.Open(cfg.DBPath, 0600, nil)
 	fatalError(err)
 
-}
-
-// Text todo
-type Text struct {
-	ToUserName   string `xml:"ToUserName"`
-	FromUserName string `xml:"FromUserName"`
-	CreateTime   int64  `xml:"CreateTime"`
-	MsgType      string `xml:"MsgType"`
-	Content      string `xml:"Content"`
-	MsgID        string `xml:"MsgId"`
 }

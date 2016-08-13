@@ -2,15 +2,19 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"io"
 	"strings"
+
+	"github.com/boltdb/bolt"
 )
 
 // Context todo
 type Context struct {
-	app *App
+	w io.Writer
 
 	commandName      string
 	commandArguments []string
@@ -19,12 +23,12 @@ type Context struct {
 	PersonInfo PersonInfo
 }
 
-func NewContext(app *App, r io.Reader) (*Context, error) {
+func NewContext(w io.Writer, r io.Reader) (*Context, error) {
 	var ctx Context
-	ctx.app = app
+	ctx.w = w
 
 	// 解析message
-	buffer := bytes.NewBuffer(nil)
+	buffer := bufferPool.Get().(*bytes.Buffer)
 	buffer.ReadFrom(r)
 	if err := xml.Unmarshal(buffer.Bytes(), &ctx.Message); err != nil {
 		return nil, err
@@ -64,7 +68,60 @@ func (c *Context) Arg(index int) string {
 	return c.commandArguments[index]
 }
 
+func (c *Context) Print(a ...interface{}) {
+	fmt.Fprint(c.w, a...)
+}
+
+func (c *Context) Printf(format string, a ...interface{}) {
+	fmt.Fprintf(c.w, format, a...)
+}
+
 // Command todo
 type Command struct {
 	Action func(*Context)
+}
+
+// Text todo
+type Text struct {
+	ToUserName   string `xml:"ToUserName"`
+	FromUserName string `xml:"FromUserName"`
+	CreateTime   int64  `xml:"CreateTime"`
+	MsgType      string `xml:"MsgType"`
+	Content      string `xml:"Content"`
+	MsgID        string `xml:"MsgId"`
+}
+
+// PersonInfo todo
+type PersonInfo struct {
+	OpenID string
+
+	StudentID string
+	Name      string
+
+	PhoneNumber string
+}
+
+//Get todo
+func (p *PersonInfo) Get(openid string) error {
+	return db.View(func(tx *bolt.Tx) error {
+		bx := tx.Bucket([]byte("PersonInfo"))
+		data := bx.Get([]byte(openid))
+		if data == nil || string(data) == "" {
+			return nil
+		}
+		return json.Unmarshal(data, p)
+	})
+
+}
+
+// Put todo
+func (p *PersonInfo) Put() error {
+	return db.Update(func(tx *bolt.Tx) error {
+		bx := tx.Bucket([]byte("PersonInfo"))
+		data, err := json.Marshal(p)
+		if err != nil {
+			return err
+		}
+		return bx.Put([]byte(p.OpenID), data)
+	})
 }

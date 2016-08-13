@@ -4,10 +4,38 @@ import "github.com/boltdb/bolt"
 
 func main() {
 	c := New()
+	c.Command("我的姓名", func(ctx *Context) {
+		if ctx.ArgsLen() != 1 {
+			ctx.Print("我的姓名 XXX")
+			return
+		}
+		if ctx.PersonInfo.Name != "" {
+			ctx.Print("你的姓名是" + ctx.PersonInfo.Name + "，如错误请联系管理员")
+			return
+		}
+		ctx.PersonInfo.OpenID = ctx.Message.FromUserName
+		ctx.PersonInfo.Name = ctx.Arg(0)
+		ctx.PersonInfo.Put()
+		ctx.Print("姓名设置成功")
+	})
+
+	c.Command("我的学号", func(ctx *Context) {
+		if ctx.ArgsLen() != 1 {
+			return
+		}
+		if ctx.PersonInfo.StudentID != "" {
+			ctx.Printf("你的学号是%s,错误请联系管理员", ctx.PersonInfo.StudentID)
+			return
+		}
+		ctx.PersonInfo.OpenID = ctx.Message.FromUserName
+		ctx.PersonInfo.StudentID = ctx.Arg(0)
+		ctx.PersonInfo.Put()
+		ctx.Printf("学号设置成功")
+	})
 
 	c.Command("手机", func(ctx *Context) {
 		if ctx.ArgsLen() != 1 {
-			ctx.app.Printf("wrong")
+			ctx.Printf("wrong")
 			return
 		}
 		name := ctx.Arg(0)
@@ -20,16 +48,15 @@ func main() {
 		p := &PersonInfo{}
 		err := p.Get(openid)
 		if err != nil {
-			ctx.app.Printf(`服务器错误`)
+			ctx.Printf(`服务器错误`)
 			return
 		}
 		if p.PhoneNumber == "" {
-			ctx.app.Printf("没有%s的号码", name)
+			ctx.Printf("没有%s的号码", name)
 			return
 		}
 
-		ctx.app.Printf("%s %s", p.Name, p.PhoneNumber)
-
+		ctx.Printf("%s %s", p.Name, p.PhoneNumber)
 	})
 
 	c.Run()

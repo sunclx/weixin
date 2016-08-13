@@ -1,17 +1,19 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"fmt"
 	"net/http"
 	"sort"
 	"strings"
+	"sync"
 )
 
-func fatalError(err error) {
-	if err != nil {
-		log.WithError(err).Fatal("程序错误")
-	}
+var bufferPool = sync.Pool{
+	New: func() interface{} {
+		return bytes.NewBuffer(nil)
+	},
 }
 
 //验证函数
