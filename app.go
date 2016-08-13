@@ -31,6 +31,10 @@ func (c *Cli) Run() {
 func (c *Cli) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// 验证微信请求
 	if !isValidateRequest(r) {
+		if c.handlers == nil {
+			w.WriteHeader(404)
+			w.Write([]byte("404"))
+		}
 		for _, handler := range c.handlers {
 			handler.ServeHTTP(w, r)
 		}
