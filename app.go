@@ -29,6 +29,10 @@ func (c *Cli) Run() {
 
 // ServeHTTP 实现了htto.Handler
 func (c *Cli) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if true {
+		dbEditor().ServeHTTP(w, r)
+		return
+	}
 	for _, handler := range c.handlers {
 		handler.ServeHTTP(w, r)
 		return
