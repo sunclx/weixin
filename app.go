@@ -29,7 +29,7 @@ func (c *Cli) Run() {
 
 // ServeHTTP 实现了htto.Handler
 func (c *Cli) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// 验证请求
+	// 验证微信请求
 	if !isValidateRequest(r) {
 		for _, handler := range c.handlers {
 			handler.ServeHTTP(w, r)
