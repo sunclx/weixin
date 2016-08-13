@@ -35,10 +35,20 @@ func main() {
 			ctx.Print("学号设置成功")
 		}
 	})
+	c.Command("我的手机", func(ctx *Context) {
+		if ctx.NArg() != 1 {
+			return
+		}
+		ctx.User.OpenID = ctx.Message.FromUserName
+		ctx.User.PhoneNumber = ctx.Arg(1)
+		ctx.User.Put()
+		if err := ctx.User.Put(); err == nil {
+			ctx.Print("手机设置成功")
+		}
+	})
 
 	c.Command("手机", func(ctx *Context) {
 		if ctx.NArg() != 1 {
-			ctx.Printf("wrong")
 			return
 		}
 		name := ctx.Arg(0)
