@@ -51,7 +51,7 @@ func main() {
 		if ctx.NArg() != 1 {
 			return
 		}
-		name := ctx.Arg(0)
+		name := ctx.Arg(1)
 		var openid string
 		db.Update(func(tx *bolt.Tx) error {
 			data := tx.Bucket([]byte("NameOpenID")).Get([]byte(name))
@@ -64,7 +64,7 @@ func main() {
 			ctx.Printf(`服务器错误`)
 			return
 		}
-		log.Info(p)
+
 		if p.PhoneNumber == "" {
 			ctx.Printf("没有%s的号码", name)
 			return
