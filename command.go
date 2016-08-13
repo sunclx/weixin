@@ -12,17 +12,18 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-// Context todo
+// Context 是Command的上下文
 type Context struct {
 	w io.Writer
 
 	commandName      string
 	commandArguments []string
 
-	Message    Text
-	PersonInfo PersonInfo
+	Message Text
+	User    User
 }
 
+// NewContext 读取io.Reader返回*Context，nil；若数据错误返回nil,error
 func NewContext(w io.Writer, r io.Reader) (*Context, error) {
 	var ctx Context
 	ctx.w = w
@@ -37,8 +38,8 @@ func NewContext(w io.Writer, r io.Reader) (*Context, error) {
 		return nil, errors.New("暂不支持此类型信息")
 	}
 
-	// 获取PersonInfo
-	if err := ctx.PersonInfo.Get(ctx.Message.FromUserName); err != nil {
+	// 获取User
+	if err := ctx.User.Get(ctx.Message.FromUserName); err != nil {
 		return nil, err
 	}
 
@@ -53,32 +54,48 @@ func NewContext(w io.Writer, r io.Reader) (*Context, error) {
 
 	return &ctx, nil
 }
+
+// CommandName todo
 func (c *Context) CommandName() string {
 	return c.commandName
 }
 
-func (c *Context) ArgsLen() int {
+// NArg todo
+func (c *Context) NArg() int {
 	return len(c.commandArguments)
 }
 
+// Arg todo
 func (c *Context) Arg(index int) string {
-	if index >= c.ArgsLen() || index < 0 {
+	if index-1 >= c.NArg() || index-1 < 0 {
 		return ""
 	}
-	return c.commandArguments[index]
+	return c.commandArguments[index-1]
 }
 
+// Print todo
 func (c *Context) Print(a ...interface{}) {
 	fmt.Fprint(c.w, a...)
 }
 
+// Printf todo
 func (c *Context) Printf(format string, a ...interface{}) {
 	fmt.Fprintf(c.w, format, a...)
 }
 
 // Command todo
 type Command struct {
-	Action func(*Context)
+	action func(*Context)
+}
+
+// NewCommand todo
+func NewCommand(action func(*Context)) *Command {
+	return &Command{action: action}
+}
+
+// Run todo
+func (c *Command) Run(ctx *Context) {
+	c.action(ctx)
 }
 
 // Text todo
@@ -91,8 +108,8 @@ type Text struct {
 	MsgID        string `xml:"MsgId"`
 }
 
-// PersonInfo todo
-type PersonInfo struct {
+// User todo
+type User struct {
 	OpenID string
 
 	StudentID string
@@ -102,9 +119,9 @@ type PersonInfo struct {
 }
 
 //Get todo
-func (p *PersonInfo) Get(openid string) error {
+func (p *User) Get(openid string) error {
 	return db.View(func(tx *bolt.Tx) error {
-		bx := tx.Bucket([]byte("PersonInfo"))
+		bx := tx.Bucket([]byte("User"))
 		data := bx.Get([]byte(openid))
 		if data == nil || string(data) == "" {
 			return nil
@@ -115,9 +132,9 @@ func (p *PersonInfo) Get(openid string) error {
 }
 
 // Put todo
-func (p *PersonInfo) Put() error {
+func (p *User) Put() error {
 	return db.Update(func(tx *bolt.Tx) error {
-		bx := tx.Bucket([]byte("PersonInfo"))
+		bx := tx.Bucket([]byte("User"))
 		data, err := json.Marshal(p)
 		if err != nil {
 			return err

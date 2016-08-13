@@ -5,36 +5,36 @@ import "github.com/boltdb/bolt"
 func main() {
 	c := New()
 	c.Command("我的姓名", func(ctx *Context) {
-		if ctx.ArgsLen() != 1 {
+		if ctx.NArg() != 1 {
 			ctx.Print("我的姓名 XXX")
 			return
 		}
-		if ctx.PersonInfo.Name != "" {
-			ctx.Print("你的姓名是" + ctx.PersonInfo.Name + "，如错误请联系管理员")
+		if ctx.User.Name != "" {
+			ctx.Print("你的姓名是" + ctx.User.Name + "，如错误请联系管理员")
 			return
 		}
-		ctx.PersonInfo.OpenID = ctx.Message.FromUserName
-		ctx.PersonInfo.Name = ctx.Arg(0)
-		ctx.PersonInfo.Put()
+		ctx.User.OpenID = ctx.Message.FromUserName
+		ctx.User.Name = ctx.Arg(0)
+		ctx.User.Put()
 		ctx.Print("姓名设置成功")
 	})
 
 	c.Command("我的学号", func(ctx *Context) {
-		if ctx.ArgsLen() != 1 {
+		if ctx.NArg() != 1 {
 			return
 		}
-		if ctx.PersonInfo.StudentID != "" {
-			ctx.Printf("你的学号是%s,错误请联系管理员", ctx.PersonInfo.StudentID)
+		if ctx.User.StudentID != "" {
+			ctx.Printf("你的学号是%s,错误请联系管理员", ctx.User.StudentID)
 			return
 		}
-		ctx.PersonInfo.OpenID = ctx.Message.FromUserName
-		ctx.PersonInfo.StudentID = ctx.Arg(0)
-		ctx.PersonInfo.Put()
+		ctx.User.OpenID = ctx.Message.FromUserName
+		ctx.User.StudentID = ctx.Arg(0)
+		ctx.User.Put()
 		ctx.Printf("学号设置成功")
 	})
 
 	c.Command("手机", func(ctx *Context) {
-		if ctx.ArgsLen() != 1 {
+		if ctx.NArg() != 1 {
 			ctx.Printf("wrong")
 			return
 		}
@@ -45,7 +45,7 @@ func main() {
 			openid = string(data)
 			return nil
 		})
-		p := &PersonInfo{}
+		p := &User{}
 		err := p.Get(openid)
 		if err != nil {
 			ctx.Printf(`服务器错误`)

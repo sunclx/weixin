@@ -7,36 +7,38 @@ import (
 	"time"
 )
 
-//App todo
-type App struct {
+//Cli 是基本类型
+type Cli struct {
 	commands map[string]*Command
 }
 
-// New todo
-func New() *App {
-	return &App{
+// New 返回一个新 *Cli
+func New() *Cli {
+	return &Cli{
 		commands: make(map[string]*Command),
 	}
 }
 
-// Run todo
-func (c *App) Run() {
+// Run 运行Cli
+func (c *Cli) Run() {
 	if err := http.ListenAndServe(":80", c); err != nil {
 		log.WithError(err).Fatal("启动失败")
 	}
 }
 
-// ServeHTTP todo
-func (c *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+// ServeHTTP 实现了htto.Handler
+func (c *Cli) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	log.WithField("none", "").Info(w.Header)
+	// 验证请求
 	if !isValidateRequest(r) {
 		w.WriteHeader(404)
 		w.Write([]byte("404"))
 		return
 	}
 
+	// 返回数据
 	out := bufferPool.Get().(*bytes.Buffer)
 	out.Reset()
-
 	defer func() {
 		if out.Len() <= 0 {
 			out.WriteString("failed")
@@ -59,31 +61,22 @@ func (c *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	log.WithField("openid", ctx.Message.FromUserName).Infof("%#v\n", ctx.Message)
 
-	command, ok := c.commands[ctx.CommandName()]
-	if !ok {
-		out.WriteString("不支持")
+	// 执行Command
+	switch command, ok := c.commands[ctx.CommandName()]; {
+	case !ok:
 		return
+	case ctx.CommandName() == "我的姓名", ctx.CommandName() == "我的学号":
+		command.Run(ctx)
+	case ctx.User.Name == "":
+		ctx.Print(`请输入"我的姓名 XXX"`)
+	case ctx.User.StudentID == "":
+		ctx.Print(`请输入"我的学号 XXXXXXXX"`)
+	default:
+		command.Run(ctx)
 	}
-
-	switch ctx.CommandName() {
-	case "我的姓名", "我的学号":
-		command.Action(ctx)
-		return
-	}
-
-	if ctx.PersonInfo.Name == "" {
-		out.WriteString(`请输入"我的姓名 XXX"`)
-		return
-	}
-	if ctx.PersonInfo.StudentID == "" {
-		out.WriteString(`请输入"我的学号 XXXXXXXX"`)
-		return
-	}
-
-	command.Action(ctx)
 }
 
-// Command todo
-func (c *App) Command(name string, fn func(*Context)) {
-	c.commands[name] = &Command{Action: fn}
+// Command 添加一个新命令
+func (c *Cli) Command(name string, fn func(*Context)) {
+	c.commands[name] = NewCommand(fn)
 }
