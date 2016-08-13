@@ -1,4 +1,4 @@
-package files
+package main
 import (
 	"compress/gzip"
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"github.com/gin-gonic/gin"
 )
 
 type staticFilesFile struct {
@@ -20,7 +21,8 @@ type staticFilesFile struct {
 	hash string
 }
 
-var staticFiles = map[string]*staticFilesFile{
+type staticFiles map[string]*staticFilesFile
+var sF = staticFiles{
 	"web/css/components/accordion.almost-flat.css": {
 		data:  "\x1f\x8b\b\x00\x00\tn\x88\x02\xff\xb4\x92\xcfk\xdbN\x10\xc5\xef\x06\xff\x0f\xef\x9b\\\xbe5\x95\u007f\x88\xb8\x94-.\x94\x9e\x02\r\x81\xfe8\xf4\x96\xd5\xeeH\xdaJ\xdaYV\xa3\xdam\xdd\xff\xbdX\xb2ꄒ\xe6\xe2\xae@\x877\xc3|\xde<f1\xfb\x0f\x9f\xae+'H\xe7\xe9\x8by\x8a=J\x91\xa0\x16\x8b\xedv;/H:W9\x99\x1bn\xb0\xc7\xff\xe6\x19\xd2\xe5\xea\n\x9foo\xa5\xa4\x86\xb0\xc7\xcd\xf5G\xbcs\x86|K\x98-\xa6\x93\xc5\f\x9b3\xbd\xe9\x04\xc0[n\x02{\xf2\xa2\xf0\xc6\x18\x8eֱ\x9fN\xce\xc6\xd8lF\xd7\x1f\xba,\xe1\xec\v\x19Q\xb8\xeb\xaaD\x8f\xb4D\x9c\xd4tw~\xe8\xfcO\n~\x1c\x96nt,\x9cO\x84\x83\xc2\xf2\xd5=%c\x11n\x14V\xeb\xb0\xeb\xf5\xa0\xadu\xbePX\x87\xddIʹ\xa9\x8aȝ\xb7\n\x97\xf9\xfa\xf0\xf5z\xce^\x92\xd6}'\x85\xd5\xcbco\xed<%%\xb9\xa2\x14\x85\xf4ꨚ.\xb6\x1c\x15\x02;/\x14\x87\xa9\x1c-E\x85Uء\xe5\xdaY\\\xda\xfeݫ&Q[\u05f5\nà\x9fO$k\xd8\vy\xf9\xe7\xd9\x1e9C\xba\xbf3[\xf6\x89\x9d~\xa3\xe1\xe9\x043\xdc8\x13\x19\xa6&\x1ds\xb7\x830\x1a]\x11\x82\xf6T\xb7h8\x12\"g]+\x87\xeeǀ*\xa3\x9c#=\u007f\xac\xacs\xa18\xb8\x1a%\\\\\xf4yZ׆Z\u007fS\x10\x9d\xd54X{z\xc8\xc1\xaeB\xc6R>X\xe6=5\xfc\x95\x8eW\x84<r\x03)\t\xb5n%1\xa5\xab\xedߖ\xc0k\xa8S\xe7\x83\v\x1d\xefq9\xd0~\x05\x00\x00\xff\xff\xf34\x98\xd0M\x04\x00\x00",
 		hash:  "30b1f92d71a23837d60bd1cb75093fe03f75cddf774d7486c7c95e68beb31e65",
@@ -1575,7 +1577,7 @@ var staticFiles = map[string]*staticFilesFile{
 var NotFound = http.NotFound
 
 // ServeHTTP serves a request, attempting to reply with an embedded file.
-func ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+func(staticFiles staticFiles) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	f, ok := staticFiles[strings.TrimPrefix(req.URL.Path, "/")]
 	if !ok {
 		NotFound(rw, req)
@@ -1616,12 +1618,13 @@ func ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// Server is simply ServeHTTP but wrapped in http.HandlerFunc so it can be passed into net/http functions directly.
-var Server http.Handler = http.HandlerFunc(ServeHTTP)
+func(staticFiles staticFiles) ServeFiles(c *gin.Context) {
+	staticFiles.ServeHTTP(c.Writer,c.Request)
+}
 
 // Open allows you to read an embedded file directly. It will return a decompressing Reader if the file is embedded in compressed format.
 // You should close the Reader after you're done with it.
-func Open(name string) (io.ReadCloser, error) {
+func (staticFiles staticFiles) Open(name string) (io.ReadCloser, error) {
 	f, ok := staticFiles[name]
 	if !ok {
 		return nil, fmt.Errorf("Asset %s not found", name)
@@ -1629,15 +1632,15 @@ func Open(name string) (io.ReadCloser, error) {
 
 	if f.size == 0 {
 		return ioutil.NopCloser(strings.NewReader(f.data)), nil
-	} else {
-		return gzip.NewReader(strings.NewReader(f.data))
-	}
+	} 
+	return gzip.NewReader(strings.NewReader(f.data))
+
 }
 
 // ModTime returns the modification time of the original file.
 // Useful for caching purposes
 // Returns zero time if the file is not in the bundle
-func ModTime(file string) (t time.Time) {
+func (staticFiles staticFiles) ModTime(file string) (t time.Time) {
 	if f, ok := staticFiles[file]; ok {
 		t = f.mtime
 	}
@@ -1647,7 +1650,7 @@ func ModTime(file string) (t time.Time) {
 // Hash returns the hex-encoded SHA256 hash of the original file
 // Used for the Etag, and useful for caching
 // Returns an empty string if the file is not in the bundle
-func Hash(file string) (s string) {
+func (staticFiles staticFiles) Hash(file string) (s string) {
 	if f, ok := staticFiles[file]; ok {
 		s = f.hash
 	}
