@@ -29,13 +29,11 @@ func (c *Cli) Run() {
 
 // ServeHTTP 实现了htto.Handler
 func (c *Cli) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	for _, handler := range c.handlers {
-		handler.ServeHTTP(w, r)
-	}
 	// 验证请求
 	if !isValidateRequest(r) {
-		w.WriteHeader(404)
-		w.Write([]byte("404"))
+		for _, handler := range c.handlers {
+			handler.ServeHTTP(w, r)
+		}
 		return
 	}
 
