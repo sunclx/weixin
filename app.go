@@ -68,15 +68,13 @@ func (c *Cli) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// 执行Command
 	switch command, ok := c.commands[ctx.CommandName()]; {
-	case !ok:
-		return
 	case ctx.CommandName() == "我的姓名", ctx.CommandName() == "我的学号":
 		command.Run(ctx)
 	case ctx.User.Name == "":
 		ctx.Print(`请输入"我的姓名 XXX"`)
 	case ctx.User.StudentID == "":
 		ctx.Print(`请输入"我的学号 XXXXXXXX"`)
-	default:
+	case ok:
 		command.Run(ctx)
 	}
 }
