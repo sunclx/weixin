@@ -29,10 +29,8 @@ func (c *Cli) Run() {
 
 // ServeHTTP 实现了htto.Handler
 func (c *Cli) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
-	log.WithField("none", "").Info(w.Header())
 	for _, handler := range c.handlers {
-		handler.ServeHTTP(nil, r)
+		handler.ServeHTTP(w, r)
 	}
 	// 验证请求
 	if !isValidateRequest(r) {
