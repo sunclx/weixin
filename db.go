@@ -35,12 +35,10 @@ type control struct {
 }
 
 func rstring(w http.ResponseWriter, content string) {
-	w.WriteHeader(200)
 	io.WriteString(w, content)
 }
 
 func rjson(w http.ResponseWriter, obj interface{}) {
-	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	json.NewEncoder(w).Encode(obj)
 }
