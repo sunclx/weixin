@@ -39,11 +39,10 @@ func rstring(w http.ResponseWriter, content string) {
 	io.WriteString(w, content)
 }
 
-var jsonContentType = []string{"application/json; charset=utf-8"}
-
 func rjson(w http.ResponseWriter, obj interface{}) {
 	w.WriteHeader(200)
-	w.Header()["Content-Type"] = jsonContentType
+	w.Header()["Content-Type"] = []string{"application/json; charset=utf-8"}
+
 	json.NewEncoder(w).Encode(obj)
 }
 
