@@ -225,7 +225,6 @@ func (ctr *control) Buckets(w http.ResponseWriter, r *http.Request) {
 		})
 	})
 	rjson(w, res)
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 }
 
 type staticFilesFile struct {
