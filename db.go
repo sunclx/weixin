@@ -145,6 +145,7 @@ func (ctr *control) Get(w http.ResponseWriter, r *http.Request) {
 		data, _ := json.Marshal(res)
 		w.WriteHeader(200)
 		w.Write(data)
+		return
 	}
 	ctr.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(bucket))
@@ -179,6 +180,7 @@ func (ctr *control) PrefixScan(w http.ResponseWriter, r *http.Request) {
 		data, _ := json.Marshal(res)
 		w.WriteHeader(200)
 		w.Write(data)
+		return
 	}
 	count := 0
 	if key == "" {
@@ -249,7 +251,6 @@ type staticFilesFile struct {
 	hash string
 }
 
-// ServeHTTP serves a request, attempting to reply with an embedded file.
 func (ctr *control) Files(rw http.ResponseWriter, req *http.Request) {
 	f, ok := ctr.files[strings.TrimPrefix(req.URL.Path, "/")]
 	if !ok {
