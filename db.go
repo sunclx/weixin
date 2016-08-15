@@ -252,6 +252,10 @@ type staticFilesFile struct {
 }
 
 func (ctr *control) Files(rw http.ResponseWriter, req *http.Request) {
+	if req.URL.Path != "" {
+		w.Write([]byte(req.URL.Path))
+		return
+	}
 	filename := strings.TrimPrefix(req.URL.Path, "/")
 	if filename == "web/js//jquery-2.2.3.min.js" {
 		filename = "web/js/jquery-2.2.3.min.js"
