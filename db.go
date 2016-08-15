@@ -39,9 +39,9 @@ func rstring(w http.ResponseWriter, content string) {
 }
 
 func rjson(w http.ResponseWriter, obj interface{}) {
-	w.WriteHeader(200)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	json.NewEncoder(w).Encode(obj)
+	w.WriteHeader(200)
 }
 
 func (ctr *control) Index(w http.ResponseWriter, r *http.Request) {
