@@ -252,7 +252,11 @@ type staticFilesFile struct {
 }
 
 func (ctr *control) Files(rw http.ResponseWriter, req *http.Request) {
-	f, ok := ctr.files[strings.TrimPrefix(req.URL.Path, "/")]
+	filename := strings.TrimPrefix(req.URL.Path, "/")
+	if filename == "web/js//jquery-2.2.3.min.js" {
+		filename = "web/js/jquery-2.2.3.min.js"
+	}
+	f, ok := ctr.files[filename]
 	if !ok {
 		http.NotFound(rw, req)
 		return
