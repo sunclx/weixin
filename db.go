@@ -142,11 +142,9 @@ func (ctr *control) Get(w http.ResponseWriter, r *http.Request) {
 	key := r.Form.Get("key")
 	if bucket == "" || key == "" {
 		res[1] = "no bucket name or key | n"
-		data, _ := json.Marshal(res)
+		w.Header()["Content-Type"][0] = "application/json; charset=utf-8"
 		w.WriteHeader(200)
-		w.Write([]byte("{"))
-		w.Write(data)
-		w.Write([]byte("}"))
+		json.NewEncoder(w).Encode(res)
 		return
 	}
 	ctr.db.View(func(tx *bolt.Tx) error {
@@ -161,11 +159,9 @@ func (ctr *control) Get(w http.ResponseWriter, r *http.Request) {
 		}
 		return nil
 	})
-	data, _ := json.Marshal(res)
+	w.Header()["Content-Type"][0] = "application/json; charset=utf-8"
 	w.WriteHeader(200)
-	w.Write([]byte("{"))
-	w.Write(data)
-	w.Write([]byte("}"))
+	json.NewEncoder(w).Encode(res)
 }
 
 func (ctr *control) PrefixScan(w http.ResponseWriter, r *http.Request) {
@@ -181,11 +177,9 @@ func (ctr *control) PrefixScan(w http.ResponseWriter, r *http.Request) {
 
 	if bucket == "" {
 		res.Result = "no bucket name | n"
-		data, _ := json.Marshal(res)
+		w.Header()["Content-Type"][0] = "application/json; charset=utf-8"
 		w.WriteHeader(200)
-		w.Write([]byte("{"))
-		w.Write(data)
-		w.Write([]byte("}"))
+		json.NewEncoder(w).Encode(res)
 		return
 	}
 	count := 0
@@ -228,11 +222,9 @@ func (ctr *control) PrefixScan(w http.ResponseWriter, r *http.Request) {
 			return nil
 		})
 	}
-	data, _ := json.Marshal(res)
+	w.Header()["Content-Type"][0] = "application/json; charset=utf-8"
 	w.WriteHeader(200)
-	w.Write([]byte("{"))
-	w.Write(data)
-	w.Write([]byte("}"))
+	json.NewEncoder(w).Encode(res)
 }
 
 func (ctr *control) Buckets(w http.ResponseWriter, r *http.Request) {
@@ -244,11 +236,9 @@ func (ctr *control) Buckets(w http.ResponseWriter, r *http.Request) {
 			return nil
 		})
 	})
-	data, _ := json.Marshal(res)
+	w.Header()["Content-Type"][0] = "application/json; charset=utf-8"
 	w.WriteHeader(200)
-	w.Write([]byte("{"))
-	w.Write(data)
-	w.Write([]byte("}"))
+	json.NewEncoder(w).Encode(res)
 }
 
 type staticFilesFile struct {
