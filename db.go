@@ -144,7 +144,9 @@ func (ctr *control) Get(w http.ResponseWriter, r *http.Request) {
 		res[1] = "no bucket name or key | n"
 		data, _ := json.Marshal(res)
 		w.WriteHeader(200)
+		w.Write([]byte("{"))
 		w.Write(data)
+		w.Write([]byte("}"))
 		return
 	}
 	ctr.db.View(func(tx *bolt.Tx) error {
@@ -161,7 +163,9 @@ func (ctr *control) Get(w http.ResponseWriter, r *http.Request) {
 	})
 	data, _ := json.Marshal(res)
 	w.WriteHeader(200)
+	w.Write([]byte("{"))
 	w.Write(data)
+	w.Write([]byte("}"))
 }
 
 func (ctr *control) PrefixScan(w http.ResponseWriter, r *http.Request) {
@@ -179,7 +183,9 @@ func (ctr *control) PrefixScan(w http.ResponseWriter, r *http.Request) {
 		res.Result = "no bucket name | n"
 		data, _ := json.Marshal(res)
 		w.WriteHeader(200)
+		w.Write([]byte("{"))
 		w.Write(data)
+		w.Write([]byte("}"))
 		return
 	}
 	count := 0
@@ -224,7 +230,9 @@ func (ctr *control) PrefixScan(w http.ResponseWriter, r *http.Request) {
 	}
 	data, _ := json.Marshal(res)
 	w.WriteHeader(200)
+	w.Write([]byte("{"))
 	w.Write(data)
+	w.Write([]byte("}"))
 }
 
 func (ctr *control) Buckets(w http.ResponseWriter, r *http.Request) {
@@ -238,7 +246,9 @@ func (ctr *control) Buckets(w http.ResponseWriter, r *http.Request) {
 	})
 	data, _ := json.Marshal(res)
 	w.WriteHeader(200)
+	w.Write([]byte("{"))
 	w.Write(data)
+	w.Write([]byte("}"))
 }
 
 type staticFilesFile struct {
