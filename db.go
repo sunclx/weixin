@@ -34,6 +34,8 @@ type control struct {
 	files map[string]*staticFilesFile
 }
 
+var jsonContentType = []string{"application/json; charset=utf-8"}
+
 func (ctr *control) Index(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/web/html/layout.html", 301)
 }
@@ -142,7 +144,7 @@ func (ctr *control) Get(w http.ResponseWriter, r *http.Request) {
 	key := r.Form.Get("key")
 	if bucket == "" || key == "" {
 		res[1] = "no bucket name or key | n"
-		w.Header()["Content-Type"][0] = "application/json; charset=utf-8"
+		w.Header()["Content-Type"] = jsonContentType
 		w.WriteHeader(200)
 		json.NewEncoder(w).Encode(res)
 		return
@@ -159,7 +161,7 @@ func (ctr *control) Get(w http.ResponseWriter, r *http.Request) {
 		}
 		return nil
 	})
-	w.Header()["Content-Type"][0] = "application/json; charset=utf-8"
+	w.Header()["Content-Type"] = jsonContentType
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(res)
 }
@@ -177,7 +179,7 @@ func (ctr *control) PrefixScan(w http.ResponseWriter, r *http.Request) {
 
 	if bucket == "" {
 		res.Result = "no bucket name | n"
-		w.Header()["Content-Type"][0] = "application/json; charset=utf-8"
+		w.Header()["Content-Type"] = jsonContentType
 		w.WriteHeader(200)
 		json.NewEncoder(w).Encode(res)
 		return
@@ -222,7 +224,7 @@ func (ctr *control) PrefixScan(w http.ResponseWriter, r *http.Request) {
 			return nil
 		})
 	}
-	w.Header()["Content-Type"][0] = "application/json; charset=utf-8"
+	w.Header()["Content-Type"] = jsonContentType
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(res)
 }
@@ -236,7 +238,7 @@ func (ctr *control) Buckets(w http.ResponseWriter, r *http.Request) {
 			return nil
 		})
 	})
-	w.Header()["Content-Type"][0] = "application/json; charset=utf-8"
+	w.Header()["Content-Type"] = jsonContentType
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(res)
 }
