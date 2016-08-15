@@ -25,7 +25,7 @@ func dbEditor() http.Handler {
 	s.HandleFunc("/deleteKey", c.DeleteKey)
 	s.HandleFunc("/deleteBucket", c.DeleteBucket)
 	s.HandleFunc("/prefixScan", c.PrefixScan)
-	s.HandleFunc("/web/*filepath", c.Files)
+	s.HandleFunc("/web/", c.Files)
 	return s
 }
 
@@ -252,10 +252,6 @@ type staticFilesFile struct {
 }
 
 func (ctr *control) Files(rw http.ResponseWriter, req *http.Request) {
-	if req.URL.Path != "" {
-		rw.Write([]byte(req.URL.Path))
-		return
-	}
 	filename := strings.TrimPrefix(req.URL.Path, "/")
 	if filename == "web/js//jquery-2.2.3.min.js" {
 		filename = "web/js/jquery-2.2.3.min.js"
