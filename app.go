@@ -2,8 +2,10 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -27,8 +29,19 @@ func (c *Cli) Run() {
 	}
 }
 
+type contextKey int
+
+const ctkey contextKey = 0
+
 // ServeHTTP 实现了htto.Handler
 func (c *Cli) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
+	ss := strings.Fields(path)
+	switch ss[0] {
+	case "db", "buckets", "createBucket", "put", "get", "deleteKey", "deleteBucket", "prefixScan":
+	case "web":
+
+	}
 	// 验证微信请求
 	if !isValidateRequest(r) {
 		if c.handlers == nil {
@@ -65,6 +78,8 @@ func (c *Cli) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.WithField("openid", ctx.Message.FromUserName).Infof("%#v\n", ctx)
+
+	r.WithContext(context.WithValue(context.Background(), ctkey, ctx))
 
 	// 执行Command
 	switch command, ok := c.commands[ctx.CommandName()]; {

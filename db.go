@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"compress/gzip"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,35 +11,28 @@ import (
 	"time"
 
 	"github.com/boltdb/bolt"
+	"github.com/sunclx/httprouter"
+	"github.com/sunclx/resputil"
 )
 
 func dbEditor() http.Handler {
 	c := control{db, files}
-	s := http.NewServeMux()
-	s.HandleFunc("/db", c.Index)
-	s.HandleFunc("/buckets", c.Buckets)
-	s.HandleFunc("/createBucket", c.CreateBucket)
-	s.HandleFunc("/put", c.Put)
-	s.HandleFunc("/get", c.Get)
-	s.HandleFunc("/deleteKey", c.DeleteKey)
-	s.HandleFunc("/deleteBucket", c.DeleteBucket)
-	s.HandleFunc("/prefixScan", c.PrefixScan)
-	s.HandleFunc("/web/", c.Files)
+	s := httprouter.New()
+	s.GET("/db", c.Index)
+	s.GET("/buckets", c.Buckets)
+	s.POST("/createBucket", c.CreateBucket)
+	s.POST("/put", c.Put)
+	s.POST("/get", c.Get)
+	s.POST("/deleteKey", c.DeleteKey)
+	s.POST("/deleteBucket", c.DeleteBucket)
+	s.POST("/prefixScan", c.PrefixScan)
+	s.GET("/web/", c.Files)
 	return s
 }
 
 type control struct {
 	db    *bolt.DB
 	files map[string]*staticFilesFile
-}
-
-func rstring(w http.ResponseWriter, content string) {
-	io.WriteString(w, content)
-}
-
-func rjson(w http.ResponseWriter, obj interface{}) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	json.NewEncoder(w).Encode(obj)
 }
 
 func (ctr *control) Index(w http.ResponseWriter, r *http.Request) {
@@ -51,31 +43,31 @@ func (ctr *control) CreateBucket(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	bucket := r.Form.Get("bucket")
 	if bucket == "" {
-		rstring(w, "no bucket name | n")
+		resputil.Text(w, "no bucket name | n")
 		return
 	}
 	ctr.db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte(bucket))
 		return err
 	})
-	rstring(w, "ok")
+	resputil.Text(w, "ok")
 }
 
 func (ctr *control) DeleteBucket(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	bucket := r.Form.Get("bucket")
 	if bucket == "" {
-		rstring(w, "no bucket name | n")
+		resputil.Text(w, "no bucket name | n")
 		return
 	}
 	ctr.db.Update(func(tx *bolt.Tx) error {
 		err := tx.DeleteBucket([]byte(bucket))
 		if err != nil {
-			rstring(w, "error no such bucket | n")
+			resputil.Text(w, "error no such bucket | n")
 		}
 		return err
 	})
-	rstring(w, "ok")
+	resputil.Text(w, "ok")
 }
 
 func (ctr *control) DeleteKey(w http.ResponseWriter, r *http.Request) {
@@ -83,25 +75,25 @@ func (ctr *control) DeleteKey(w http.ResponseWriter, r *http.Request) {
 	bucket := r.Form.Get("bucket")
 	key := r.Form.Get("key")
 	if bucket == "" || key == "" {
-		rstring(w, "no bucket name or key | n")
+		resputil.Text(w, "no bucket name or key | n")
 		return
 	}
 	ctr.db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte(bucket))
 		if err != nil {
-			rstring(w, "error no such bucket | n")
+			resputil.Text(w, "error no such bucket | n")
 			return fmt.Errorf("bucket: %s", err)
 		}
 
 		err = b.Delete([]byte(key))
 		if err != nil {
-			rstring(w, "error Deleting KV | n")
+			resputil.Text(w, "error Deleting KV | n")
 			return fmt.Errorf("delete kv: %s", err)
 		}
 
 		return nil
 	})
-	rstring(w, "ok")
+	resputil.Text(w, "ok")
 }
 
 func (ctr *control) Put(w http.ResponseWriter, r *http.Request) {
@@ -110,25 +102,25 @@ func (ctr *control) Put(w http.ResponseWriter, r *http.Request) {
 	key := r.Form.Get("key")
 	value := r.Form.Get("value")
 	if bucket == "" || key == "" {
-		rstring(w, "no bucket name or key | n")
+		resputil.Text(w, "no bucket name or key | n")
 		return
 	}
 	ctr.db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte(bucket))
 		if err != nil {
-			rstring(w, "error  creating bucket | n")
+			resputil.Text(w, "error  creating bucket | n")
 			return fmt.Errorf("create bucket: %s", err)
 		}
 
 		err = b.Put([]byte(key), []byte(value))
 		if err != nil {
-			rstring(w, "error writing KV | n")
+			resputil.Text(w, "error writing KV | n")
 			return fmt.Errorf("create kv: %s", err)
 		}
 
 		return nil
 	})
-	rstring(w, "ok")
+	resputil.Text(w, "ok")
 }
 
 func (ctr *control) Get(w http.ResponseWriter, r *http.Request) {
@@ -138,7 +130,7 @@ func (ctr *control) Get(w http.ResponseWriter, r *http.Request) {
 	key := r.Form.Get("key")
 	if bucket == "" || key == "" {
 		res[1] = "no bucket name or key | n"
-		rjson(w, res)
+		resputil.JSON(w, res)
 		return
 	}
 	ctr.db.View(func(tx *bolt.Tx) error {
@@ -153,7 +145,7 @@ func (ctr *control) Get(w http.ResponseWriter, r *http.Request) {
 		}
 		return nil
 	})
-	rjson(w, res)
+	resputil.JSON(w, res)
 }
 
 func (ctr *control) PrefixScan(w http.ResponseWriter, r *http.Request) {
@@ -169,7 +161,7 @@ func (ctr *control) PrefixScan(w http.ResponseWriter, r *http.Request) {
 
 	if bucket == "" {
 		res.Result = "no bucket name | n"
-		rjson(w, res)
+		resputil.JSON(w, res)
 		return
 	}
 	count := 0
@@ -212,7 +204,7 @@ func (ctr *control) PrefixScan(w http.ResponseWriter, r *http.Request) {
 			return nil
 		})
 	}
-	rjson(w, res)
+	resputil.JSON(w, res)
 }
 
 func (ctr *control) Buckets(w http.ResponseWriter, r *http.Request) {
@@ -224,7 +216,7 @@ func (ctr *control) Buckets(w http.ResponseWriter, r *http.Request) {
 			return nil
 		})
 	})
-	rjson(w, res)
+	resputil.JSON(w, res)
 }
 
 type staticFilesFile struct {
